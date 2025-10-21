@@ -55,7 +55,7 @@
                 <!-- News Feed -->
                 <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
                     <h2 class="text-2xl font-bold text-white mb-4">Latest News</h2>
-                    <div id="news-feed" class="space-y-5 h-[400px] overflow-y-auto pr-2">
+                    <div id="news-feed-content" class="space-y-5 h-[400px] overflow-y-auto pr-2">
                         <p class="text-center text-gray-400">Loading news...</p>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                 <!-- Social Feed -->
                 <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
                     <h2 class="text-2xl font-bold text-white mb-4">Social Feed</h2>
-                    <div id="social-feed" class="space-y-4 h-[500px] overflow-y-auto pr-2">
+                    <div id="social-feed-content" class="space-y-4 h-[500px] overflow-y-auto pr-2">
                          <p class="text-center text-gray-400">Loading social feed...</p>
                     </div>
                 </div>
@@ -88,25 +88,24 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // --- DOM Elements ---
             const upcomingMatchContainer = document.getElementById('upcoming-match-container');
             const statsLeadersContainer = document.getElementById('stats-leaders-container');
-            const newsFeed = document.getElementById('news-feed');
-            const socialFeed = document.getElementById('social-feed');
-
+            const newsFeedContent = document.getElementById('news-feed-content');
+            const socialFeedContent = document.getElementById('social-feed-content');
+            
+            // --- Render Functions ---
             function renderUpcomingMatch(schedule) {
-                const now = new Date();
+                 const now = new Date();
                 let nextMatch = null;
-                
                 if (schedule && schedule.length > 0) {
                     const sortedSchedule = schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
                     nextMatch = sortedSchedule.find(match => new Date(match.date) > now);
                 }
-
                 if (nextMatch) {
                     const matchDate = new Date(nextMatch.date);
                     const formattedDate = matchDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
                     const formattedTime = matchDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
                     upcomingMatchContainer.innerHTML = `
                         <h2 class="text-2xl font-bold text-white mb-4">Upcoming Match</h2>
                         <div class="text-center">
@@ -119,34 +118,23 @@
                             </div>
                             <p class="text-gray-300"><span class="font-semibold">Location:</span> ${nextMatch.location}</p>
                             <p class="text-gray-300"><span class="font-semibold">Watch on:</span> ${nextMatch.broadcast}</p>
-                        </div>
-                    `;
+                        </div>`;
                 } else {
-                    upcomingMatchContainer.innerHTML = `
-                        <h2 class="text-2xl font-bold text-white mb-4">Upcoming Match</h2>
-                        <p class="text-center text-gray-400">No upcoming matches scheduled.</p>
-                    `;
+                    upcomingMatchContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4">Upcoming Match</h2><p class="text-center text-gray-400">No upcoming matches scheduled.</p>`;
                 }
             }
 
             function renderStatsLeaders(stats) {
-                if(stats && stats.goalLeader && stats.assistLeader) {
+                if (stats && stats.goalLeader && stats.assistLeader) {
                      statsLeadersContainer.innerHTML = `
                         <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div>
-                                <p class="text-sm text-gray-400">Goal Leader</p>
-                                <p class="font-bold text-lg text-white">${stats.goalLeader.name}</p>
-                            </div>
+                            <div><p class="text-sm text-gray-400">Goal Leader</p><p class="font-bold text-lg text-white">${stats.goalLeader.name}</p></div>
                             <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeader.total}</p>
                         </div>
                         <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div>
-                                <p class="text-sm text-gray-400">Assist Leader</p>
-                                <p class="font-bold text-lg text-white">${stats.assistLeader.name}</p>
-                            </div>
+                            <div><p class="text-sm text-gray-400">Assist Leader</p><p class="font-bold text-lg text-white">${stats.assistLeader.name}</p></div>
                             <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeader.total}</p>
-                        </div>
-                    `;
+                        </div>`;
                 } else {
                     statsLeadersContainer.innerHTML = `<p class="text-center text-gray-400">Team stats currently unavailable.</p>`;
                 }
@@ -154,7 +142,7 @@
 
             function renderNews(news) {
                  if(news && news.length > 0) {
-                    newsFeed.innerHTML = news.map(article => `
+                    newsFeedContent.innerHTML = news.map(article => `
                         <div class="border-b border-gotham-border pb-4 last:border-b-0">
                             <p class="text-sm text-gray-400">${article.source} &bull; ${article.date}</p>
                             <h3 class="text-lg font-semibold text-white mt-1">${article.title}</h3>
@@ -163,13 +151,13 @@
                         </div>
                     `).join('');
                 } else {
-                     newsFeed.innerHTML = `<p class="text-center text-gray-400">News feed is currently unavailable.</p>`;
+                     newsFeedContent.innerHTML = `<p class="text-center text-gray-400">News feed is currently unavailable.</p>`;
                 }
             }
             
             function renderSocial(social) {
                  if(social && social.length > 0) {
-                    socialFeed.innerHTML = social.map(post => {
+                    socialFeedContent.innerHTML = social.map(post => {
                         if (post.type === 'instagram') {
                             return `
                                 <div class="gotham-bg-highlight p-3 rounded-lg">
@@ -178,23 +166,22 @@
                                     <p class="text-white mt-1">${post.content}</p>
                                 </div>`;
                         }
-                        // Default to twitter style
                         return `
                              <div class="gotham-bg-highlight p-3 rounded-lg">
                                 <p class="font-bold">${post.user} <span class="text-gray-400 font-normal">${post.handle} &bull; ${post.time}</span></p>
                                 <p class="text-white mt-1">${post.content}</p>
-                             </div>
-                        `;
+                             </div>`;
                     }).join('');
                 } else {
-                    socialFeed.innerHTML = `<p class="text-center text-gray-400">Social feed is currently unavailable.</p>`;
+                    socialFeedContent.innerHTML = `<p class="text-center text-gray-400">Social feed is currently unavailable.</p>`;
                 }
             }
 
+            // --- Main Data Fetching ---
             async function fetchAllData() {
                 try {
-                    // FIX: Changed URL from root-relative to relative to fix parsing issue in local/preview environments.
-                    const response = await fetch('.netlify/functions/get-gotham-data');
+                    const response = await fetch('./.netlify/functions/get-gotham-data');
+                    if (!response.ok) throw new Error(`API call failed: ${response.status}`);
                     const data = await response.json();
                     
                     renderUpcomingMatch(data.schedule);
@@ -204,10 +191,11 @@
 
                 } catch (error) {
                     console.error('Error fetching site data:', error);
-                    upcomingMatchContainer.innerHTML = `<p class="text-red-400 text-center">Could not load site data.</p>`;
-                    statsLeadersContainer.innerHTML = '';
-                    newsFeed.innerHTML = '';
-                    socialFeed.innerHTML = '';
+                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
+                    upcomingMatchContainer.innerHTML = errorMessage;
+                    statsLeadersContainer.innerHTML = errorMessage;
+                    newsFeedContent.innerHTML = errorMessage;
+                    socialFeedContent.innerHTML = errorMessage;
                 }
             }
 
