@@ -53,6 +53,34 @@ const processScheduleData = (apiData) => {
     });
 };
 
+// Helper function to process the NWSL GENERAL stats API data
+const processStatsData = (apiData) => {
+    if (!apiData || !apiData.team || !apiData.team.stats) { return null; }
+    const statsArray = apiData.team.stats;
+    const statsObj = {};
+    statsArray.forEach(stat => {
+        statsObj[stat.statsId] = { label: stat.statsLabel, value: stat.statsValue };
+    });
+    return statsObj;
+};
+
+// Helper function to process the NWSL standings API data
+const processStandingsData = (apiData) => {
+    if (!apiData || !apiData.standings || !Array.isArray(apiData.standings)) { return null; }
+    const overallTable = apiData.standings.find(s => s.type === 'table');
+    if (!overallTable || !overallTable.teams) { return null; }
+    const gothamData = overallTable.teams.find(t => t.shortName === 'Gotham FC');
+    if (!gothamData || !gothamData.stats) { return null; }
+    const getStat = (statId) => gothamData.stats.find(s => s.statsId === statId)?.statsValue;
+    const rank = getStat('rank');
+    const points = getStat('points');
+    const wins = getStat('win');
+    const losses = getStat('lose');
+    const draws = getStat('draw');
+    if (rank === undefined || points === undefined || wins === undefined || losses === undefined || draws === undefined) { return null; }
+    return { rank, points, record: `${wins}-${losses}-${draws}` };
+};
+
 // Helper function to parse CSV data from your Google Sheet
 const parseCsv = (csvString) => {
     return new Promise((resolve, reject) => {
@@ -80,11 +108,14 @@ exports.handler = async function(event, context) {
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTpJmieTcb-C1k_4NDTLR_XfVUBzSc_GBrWVPAx4bt994junG5YY_S3EtZnS_0j42RwwYSYa4eGBpAq/pub?output=csv';
     const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c';
     const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
-    
-    // Using a simplified fallback as the primary data is now more robust
+    const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general';
+    const NWSL_STANDINGS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/standings/overall?locale=en-US&orderBy=rank&direction=asc';
+
     const fallbackData = {
-        roster: [{ name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany" }],
-        schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }]
+        roster: [{ name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany", headshot: null, pageUrl: null }],
+        schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
+        stats: { "goals-scored": { label: "Goals scored", value: 'N/A' }, "goals-conceded": { label: "Goals conceded", value: 'N/A' } },
+        standings: { rank: 'N/A', points: 'N/A', record: 'N/A' },
     };
     
     async function fetchAndProcess(url, processor, fallback, ...args) {
@@ -113,15 +144,20 @@ exports.handler = async function(event, context) {
 
     const enrichmentData = await fetchCsvData(GOOGLE_SHEET_CSV_URL);
 
-    const [schedule] = await Promise.all([
+    // CORRECTED: Fetch all four data sources
+    const [schedule, stats, standings] = await Promise.all([
         fetchAndProcess(NWSL_SCHEDULE_API_URL, processScheduleData, fallbackData.schedule),
+        fetchAndProcess(NWSL_STATS_API_URL, processStatsData, fallbackData.stats),
+        fetchAndProcess(NWSL_STANDINGS_API_URL, processStandingsData, fallbackData.standings)
     ]);
     
+    // Fetch roster last, so we can pass the enrichment data to its processor
     const roster = await fetchAndProcess(NWSL_ROSTER_API_URL, processNWSLRosterData, fallbackData.roster, enrichmentData);
     
+    // CORRECTED: Include all data in the response
     return {
         statusCode: 200,
-        body: JSON.stringify({ roster, schedule })
+        body: JSON.stringify({ roster, schedule, stats, standings })
     };
 };
 
