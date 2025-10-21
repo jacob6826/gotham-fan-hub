@@ -4,24 +4,38 @@ const google = require('google-it');
 
 // Helper function to process the official NWSL roster API data from the /roster endpoint
 const processNWSLRosterData = (apiData) => {
-    // The /roster endpoint has data under `data.roster`
-    if (!apiData || !apiData.data || !apiData.data.roster) {
+    // Check for the top-level 'players' array in the new data structure
+    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) {
+        console.error("API data is missing the 'players' array.");
         return [];
     }
-    const players = apiData.data.roster;
-    return players.map(playerEntry => {
-        const player = playerEntry.person;
-        const positionInfo = playerEntry.position;
-        const position = positionInfo ? positionInfo.name.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder') : 'N/A';
-        const posMap = { 'Goalkeeper': 'GK', 'Defender': 'DF', 'Midfielder': 'MF', 'Forward': 'FW' };
-        
-        return {
-            name: `${player.firstName} ${player.lastName}`,
-            pos: posMap[position] || 'N/A',
-            num: playerEntry.jerseyNumber || 'N/A',
-            bio: `${position} from ${player.birthplace || 'N/A'}`
-        };
+
+    // Filter for only active players on the roster
+    const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
+
+    const processedPlayers = activePlayers.map(player => {
+        try {
+            // If a player entry is incomplete, skip it to prevent a crash
+            if (!player || !player.mediaFirstName || !player.mediaLastName) {
+                return null;
+            }
+
+            const position = player.roleLabel.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder');
+            const posMap = { 'Goalkeeper': 'GK', 'Defender': 'DF', 'Midfielder': 'MF', 'Forward': 'FW' };
+            
+            return {
+                name: `${player.mediaFirstName} ${player.mediaLastName}`,
+                pos: posMap[position] || 'N/A',
+                num: player.bibNumber || 'N/A',
+                bio: `${position} from ${player.nationality || 'N/A'}`
+            };
+        } catch (error) {
+            console.error("Error processing a single player entry:", player, error);
+            return null; // Skip this player if there's any processing error
+        }
     });
+    // Filter out any null entries that were skipped due to errors
+    return processedPlayers.filter(p => p !== null);
 };
 
 // Helper function to process the official NWSL schedule API data
@@ -83,7 +97,6 @@ const processNewsData = (searchData) => {
 
 exports.handler = async function(event, context) {
     // --- API URLS ---
-    // Using the /roster endpoint as requested
     const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c';
     const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
     const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=standard';
