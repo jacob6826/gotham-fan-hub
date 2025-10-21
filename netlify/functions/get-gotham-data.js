@@ -1,7 +1,8 @@
 // This is a serverless function that will run on Netlify's servers.
 // Its job is to securely fetch data from external APIs and fall back to stored data if needed.
+const google = require('google-it');
 
-// Helper function to process the official NWSL roster API data
+// Helper function to process the official NWSL roster API data from the /roster endpoint
 const processNWSLRosterData = (apiData) => {
     if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { return []; }
     const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
@@ -48,24 +49,60 @@ const processStatsData = (apiData) => {
     return statsObj;
 };
 
-// Helper function to process the NWSL standings API data
+// UPDATED Helper function to process the NWSL standings API data
 const processStandingsData = (apiData) => {
-    if (!apiData || !apiData.data || !apiData.data.standings) { return null; }
-    const gothamStanding = apiData.data.standings.find(team => team.team.name === 'NJ/NY Gotham FC');
-    if (!gothamStanding) { return null; }
+    if (!apiData || !apiData.standings || !Array.isArray(apiData.standings)) {
+        console.error("Standings data is missing 'standings' array.");
+        return null;
+    }
+    const overallTable = apiData.standings.find(s => s.type === 'table');
+    if (!overallTable || !overallTable.teams) {
+        console.error("Could not find the 'overall' standings table.");
+        return null;
+    }
+
+    const gothamData = overallTable.teams.find(t => t.shortName === 'Gotham FC');
+    if (!gothamData || !gothamData.stats) {
+        console.error("Could not find 'Gotham FC' in the standings.");
+        return null;
+    }
+
+    const getStat = (statId) => gothamData.stats.find(s => s.statsId === statId)?.statsValue;
+    
+    const rank = getStat('rank');
+    const points = getStat('points');
+    const wins = getStat('win');
+    const losses = getStat('lose');
+    const draws = getStat('draw');
+
+    if (rank === undefined || points === undefined || wins === undefined || losses === undefined || draws === undefined) {
+        console.error("One or more required stats (rank, points, W, L, D) are missing for Gotham FC.");
+        return null;
+    }
+
     return {
-        rank: gothamStanding.rank,
-        points: gothamStanding.points,
-        record: `${gothamStanding.wins}-${gothamStanding.losses}-${gothamStanding.draws}`
+        rank,
+        points,
+        record: `${wins}-${losses}-${draws}`
     };
 };
 
+
+// Helper function to process news search results from google-it
+const processNewsData = (searchData) => {
+    // ... (no changes to this function)
+};
+
+
 exports.handler = async function(event, context) {
+    // REVERTED: Using the known working Season ID for stability
+    const CURRENT_SEASON_ID = "nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c"; 
+
     // --- API URLS ---
-    const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c';
-    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
-    const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general';
-    const NWSL_STANDINGS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/standings/overall?locale=en-US&orderBy=rank&direction=asc';
+    const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${CURRENT_SEASON_ID}`;
+    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
+    const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
+    const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
 
     const fallbackData = {
         roster: [/* Full roster data can be added here as a safety net */],
@@ -88,6 +125,11 @@ exports.handler = async function(event, context) {
             console.error(`Failed to fetch live data from ${url}, using fallback.`, error);
             return fallback;
         }
+    }
+
+    // This is no longer being used as we moved to a static link list
+    async function fetchLiveNews() {
+        return [];
     }
 
     const [roster, schedule, stats, standings] = await Promise.all([
