@@ -69,15 +69,26 @@
                     if (playersInPosition.length > 0) {
                         playersInPosition.forEach(player => {
                             const placeholderText = player.name.split(' ').map(n => n[0]).join('');
-                            const imageUrl = `https://placehold.co/150x150/374151/FFFFFF?text=${placeholderText}`;
-                            html += `
-                                <div class="gotham-bg rounded-xl shadow-lg p-5 text-center transition-transform hover:scale-105 border border-gotham-border">
-                                    <img class="w-24 h-24 rounded-full mx-auto -mt-12 border-4 border-gotham-accent" src="${imageUrl}" alt="${player.name}">
+                            const imageUrl = player.headshot || `https://placehold.co/150x150/374151/FFFFFF?text=${placeholderText}`;
+                            
+                            const cardContent = `
+                                <div class="gotham-bg rounded-xl shadow-lg p-5 text-center transition-transform hover:scale-105 border border-gotham-border h-full">
+                                    <img class="w-24 h-24 rounded-full mx-auto -mt-12 border-4 border-gotham-accent object-cover bg-gray-700" 
+                                         src="${imageUrl}" 
+                                         alt="${player.name}" 
+                                         onerror="this.onerror=null;this.src='https://placehold.co/150x150/374151/FFFFFF?text=${placeholderText}';">
                                     <p class="text-2xl font-bold gotham-accent mt-4">${player.num}</p>
                                     <h3 class="text-xl font-bold text-white mt-1">${player.name}</h3>
                                     <p class="text-gray-400 text-sm h-12">${player.bio}</p>
                                 </div>
                             `;
+
+                            // If a pageUrl exists, wrap the card in a link
+                            if (player.pageUrl) {
+                                html += `<a href="${player.pageUrl}" target="_blank" rel="noopener noreferrer">${cardContent}</a>`;
+                            } else {
+                                html += cardContent;
+                            }
                         });
                     } else {
                         html += `<p class="text-gray-400 col-span-full">No players listed for this position.</p>`;
