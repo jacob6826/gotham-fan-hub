@@ -23,7 +23,7 @@
                     <text x="50" y="62" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
                 </svg>
                 <div>
-                    <h1 class="text-3xl font-bold text-white">Team Roster & Stats</h1>
+                    <h1 class="text-3xl font-bold text-white">Team Roster</h1>
                     <p class="text-lg gotham-accent font-medium">2025 Season Squad</p>
                 </div>
             </div>
@@ -31,14 +31,6 @@
                 &larr; Back to Hub
             </a>
         </header>
-
-        <!-- Stat Leaders -->
-        <section id="stats-leaders-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border mb-8">
-             <h2 class="text-2xl font-bold text-white mb-4">Team Stat Leaders</h2>
-             <div class="space-y-4">
-                <p class="text-center text-gray-400">Loading team leaders...</p>
-             </div>
-        </section>
 
         <!-- Main Content: Roster Grid -->
         <main id="roster-container">
@@ -50,32 +42,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             
             const rosterContainer = document.getElementById('roster-container');
-            const statsLeadersContainer = document.querySelector('#stats-leaders-container .space-y-4');
-
-            function renderStatsLeaders(stats) {
-                if(stats && stats.goalLeader && stats.assistLeader) {
-                     statsLeadersContainer.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                                <div>
-                                    <p class="text-sm text-gray-400">Goal Leader</p>
-                                    <p class="font-bold text-lg text-white">${stats.goalLeader.name}</p>
-                                </div>
-                                <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeader.total}</p>
-                            </div>
-                            <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                                <div>
-                                    <p class="text-sm text-gray-400">Assist Leader</p>
-                                    <p class="font-bold text-lg text-white">${stats.assistLeader.name}</p>
-                                </div>
-                                <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeader.total}</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    statsLeadersContainer.innerHTML = `<p class="text-center text-gray-400">Team stats currently unavailable.</p>`;
-                }
-            }
 
             function renderRoster(fullRoster) {
                 if (!fullRoster || fullRoster.length === 0) {
@@ -100,43 +66,41 @@
                     
                     const playersInPosition = fullRoster.filter(p => p.pos === positionCode);
 
-                    if (playersInPosition.length > 0) {
-                        playersInPosition.forEach(player => {
-                            const placeholderText = player.name.split(' ').map(n => n[0]).join('');
-                            const imageUrl = `https://placehold.co/150x150/374151/FFFFFF?text=${placeholderText}`;
-                            html += `
-                                <div class="gotham-bg rounded-xl shadow-lg p-5 text-center transition-transform hover:scale-105 border border-gotham-border">
-                                    <img class="w-24 h-24 rounded-full mx-auto -mt-12 border-4 border-gotham-accent" src="${imageUrl}" alt="${player.name}">
-                                    <p class="text-2xl font-bold gotham-accent mt-4">${player.num}</p>
-                                    <h3 class="text-xl font-bold text-white mt-1">${player.name}</h3>
-                                    <p class="text-gray-400 text-sm h-12">${player.bio}</p>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        html += `<p class="text-gray-400 col-span-full">No players listed for this position.</p>`;
-                    }
+                    playersInPosition.forEach(player => {
+                        const placeholderText = player.name.split(' ').map(n => n[0]).join('');
+                        // Using a placeholder for images as the API doesn't provide them.
+                        const imageUrl = `https://placehold.co/150x150/374151/FFFFFF?text=${placeholderText}`;
+                        html += `
+                            <div class="gotham-bg rounded-xl shadow-lg p-5 text-center transition-transform hover:scale-105 border border-gotham-border">
+                                <img class="w-24 h-24 rounded-full mx-auto -mt-12 border-4 border-gotham-accent" src="${imageUrl}" alt="${player.name}">
+                                <p class="text-2xl font-bold gotham-accent mt-4">${player.num}</p>
+                                <h3 class="text-xl font-bold text-white mt-1">${player.name}</h3>
+                                <p class="text-gray-400 text-sm h-12">${player.bio}</p>
+                            </div>
+                        `;
+                    });
 
                     html += `</div></section>`;
                 }
                 rosterContainer.innerHTML = html;
             }
 
-            async function fetchAllData() {
+            async function fetchAndDisplayRoster() {
                 try {
+                    // This path works for both local preview and live deployment
                     const response = await fetch('./.netlify/functions/get-gotham-data');
-                    if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
                     const data = await response.json();
                     renderRoster(data.roster);
-                    renderStatsLeaders(data.stats);
                 } catch (error) {
-                    rosterContainer.innerHTML = `<p class="text-center text-red-400">Could not load roster data.</p>`;
-                    statsLeadersContainer.innerHTML = '';
-                    console.error('Error fetching data:', error);
+                    rosterContainer.innerHTML = `<p class="text-center text-red-400">Could not load roster data. Please try again later.</p>`;
+                    console.error('Error fetching roster:', error);
                 }
             }
 
-            fetchAllData();
+            fetchAndDisplayRoster();
         });
     </script>
 </body>
