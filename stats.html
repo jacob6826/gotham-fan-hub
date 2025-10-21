@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gotham FC Team Stats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/custom-styles.css">
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between md:items-center mb-8">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                <svg class="h-12 w-12 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#87CEEB"/>
+                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#111827"/>
+                    <text x="50" y="62" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
+                </svg>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Team Statistics</h1>
+                    <p class="text-lg gotham-accent font-medium">2025 Season Overview</p>
+                </div>
+            </div>
+             <a href="./index.html" class="gotham-button inline-block text-center py-2 px-5 rounded-lg font-bold">
+                &larr; Back to Hub
+            </a>
+        </header>
+
+        <!-- Main Content: Stats Display -->
+        <main id="stats-page-container" class="space-y-8">
+            <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                <p class="text-center text-gray-400">Loading standings...</p>
+            </div>
+
+            <div id="player-leaders-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                 <p class="text-center text-gray-400">Loading player leaders...</p>
+            </div>
+
+            <div id="team-stats-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                 <p class="text-center text-gray-400">Loading team stats...</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const standingsContainer = document.getElementById('standings-container');
+            const playerLeadersContainer = document.getElementById('player-leaders-container');
+            const teamStatsContainer = document.getElementById('team-stats-container');
+
+            function renderStandings(standings) {
+                 if (standings) {
+                    standingsContainer.innerHTML = `
+                        <h2 class="text-2xl font-bold text-white mb-4">Current Standings</h2>
+                        <div class="gotham-bg-highlight p-4 rounded-lg text-center space-y-2">
+                            <div>
+                                <p class="text-sm text-gray-400">League Rank</p>
+                                <p class="gotham-accent font-extrabold text-4xl">${standings.rank}</p>
+                            </div>
+                            <div class="flex justify-around text-center">
+                                <div>
+                                    <p class="text-sm text-gray-400">Points</p>
+                                    <p class="font-bold text-xl">${standings.points}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-400">Record (W-L-D)</p>
+                                    <p class="font-bold text-xl">${standings.record}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                } else {
+                    standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4">Current Standings</h2><p class="text-center text-gray-400">Standings unavailable.</p>`;
+                }
+            }
+            
+            function renderPlayerLeaders(stats) {
+                let html = '<h2 class="text-2xl font-bold text-white mb-4">Player Leaders</h2><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">';
+                const statCategories = [
+                    { title: 'Goal Leaders', leaders: stats.goalLeaders, statName: 'Goals' },
+                    { title: 'Assist Leaders', leaders: stats.assistLeaders, statName: 'Assists' },
+                    { title: 'Shot Leaders', leaders: stats.shotLeaders, statName: 'Shots' },
+                    { title: 'Tackle Leaders', leaders: stats.tackleLeaders, statName: 'Tackles' },
+                    { title: 'Interception Leaders', leaders: stats.interceptionLeaders, statName: 'INT' },
+                    { title: 'Headed Duel Leaders', leaders: stats.headedDuelLeaders, statName: 'Duels Won' },
+                ];
+
+                statCategories.forEach(cat => {
+                    if (cat.leaders && cat.leaders.length > 0) {
+                        html += `<div><h3 class="text-lg font-semibold gotham-accent mb-2">${cat.title}</h3><ul class="space-y-1">`;
+                        cat.leaders.forEach((player, index) => {
+                            html += `<li class="flex justify-between items-center gotham-bg-highlight p-2 rounded-md text-sm">
+                                <span>${index + 1}. ${player.name}</span>
+                                <span class="font-bold">${player.total}</span>
+                            </li>`;
+                        });
+                        html += `</ul></div>`;
+                    }
+                });
+
+                html += '</div>';
+                playerLeadersContainer.innerHTML = html;
+            }
+
+            function renderTeamStats(stats) {
+                const getStat = (id) => stats?.[id]?.value ?? 'N/A';
+                const formatPercent = (id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : 'N/A';
+
+                let html = '<h2 class="text-2xl font-bold text-white mb-4">Overall Team Stats</h2><div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
+                const teamStats = [
+                    { label: 'Goals Scored', value: getStat('goals-scored') },
+                    { label: 'Goals Conceded', value: getStat('goals-conceded') },
+                    { label: 'Shooting Accuracy', value: formatPercent('Shooting Accuracy') },
+                    { label: 'Passing Accuracy', value: formatPercent('Passing Accuracy') },
+                    { label: 'Tackle Success %', value: formatPercent('Tackle Success') },
+                    { label: 'Clean Sheets', value: getStat('Clean Sheets') },
+                    { label: 'Yellow Cards', value: getStat('yellow-cards') },
+                    { label: 'Red Cards', value: getStat('red-cards') },
+                ];
+
+                teamStats.forEach(stat => {
+                    html += `
+                        <div class="gotham-bg-highlight p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-400">${stat.label}</p>
+                            <p class="gotham-accent font-extrabold text-3xl">${stat.value}</p>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                teamStatsContainer.innerHTML = html;
+            }
+
+            async function fetchAllData() {
+                try {
+                    const response = await fetch('./.netlify/functions/get-gotham-data');
+                    if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+                    const data = await response.json();
+                    
+                    renderStandings(data.standings);
+                    renderPlayerLeaders(data.stats);
+                    renderTeamStats(data.stats);
+
+                } catch (error) {
+                    console.error('Error fetching site data:', error);
+                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
+                    standingsContainer.innerHTML = errorMessage;
+                    playerLeadersContainer.innerHTML = errorMessage;
+                    teamStatsContainer.innerHTML = errorMessage;
+                }
+            }
+
+            fetchAllData();
+        });
+    </script>
+</body>
+</html>
