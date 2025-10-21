@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gotham FC Fan Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/custom-styles.css">
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center space-x-4">
+                <svg class="h-12 w-12 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#87CEEB"/>
+                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#111827"/>
+                    <text x="50" y="62" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
+                </svg>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Gotham FC Fan Hub</h1>
+                    <p class="text-lg gotham-accent font-medium">Your One-Stop Shop for the Bats</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Column: Main Info -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Upcoming Match & Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Upcoming Match -->
+                    <div id="upcoming-match-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                         <p class="text-center text-gray-400">Loading upcoming match...</p>
+                    </div>
+
+                    <!-- Team Stat Leaders -->
+                    <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                        <h2 class="text-2xl font-bold text-white mb-4">Team Leaders</h2>
+                        <div id="stats-leaders-container" class="space-y-4">
+                            <p class="text-center text-gray-400">Loading team leaders...</p>
+                        </div>
+                        <a href="./roster.html" class="gotham-button block w-full text-center mt-6 py-3 px-4 rounded-lg font-bold">
+                            View Full Roster & Bios
+                        </a>
+                    </div>
+                </div>
+
+                <!-- News Feed -->
+                <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                    <h2 class="text-2xl font-bold text-white mb-4">Latest News</h2>
+                    <div id="news-feed" class="space-y-5 h-[400px] overflow-y-auto pr-2">
+                        <p class="text-center text-gray-400">Loading news...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Socials -->
+            <div class="lg:col-span-1 space-y-8">
+                <!-- Social Feed -->
+                <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                    <h2 class="text-2xl font-bold text-white mb-4">Social Feed</h2>
+                    <div id="social-feed" class="space-y-4 h-[500px] overflow-y-auto pr-2">
+                         <p class="text-center text-gray-400">Loading social feed...</p>
+                    </div>
+                </div>
+                
+                <!-- Supporters Corner -->
+                <div class="gotham-bg rounded-xl shadow-lg p-5 border border-gotham-border">
+                    <h2 class="text-xl font-bold text-white mb-4">Supporters Corner</h2>
+                     <div class="gotham-bg-highlight p-4 rounded-lg text-center">
+                        <p class="text-2xl font-extrabold gotham-accent">Cloud 9</p>
+                        <p class="text-white mt-2">The original supporters of NJ/NY Gotham FC. Join us for marches, tailgates, and non-stop chanting!</p>
+                        <a href="https://cloud9goth.com/" target="_blank" rel="noopener noreferrer">
+                            <button class="gotham-button w-full mt-4 py-2 px-4 rounded-lg font-bold">Visit Website</button>
+                        </a>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const upcomingMatchContainer = document.getElementById('upcoming-match-container');
+            const statsLeadersContainer = document.getElementById('stats-leaders-container');
+            const newsFeed = document.getElementById('news-feed');
+            const socialFeed = document.getElementById('social-feed');
+
+            function renderUpcomingMatch(schedule) {
+                const now = new Date();
+                let nextMatch = null;
+                
+                if (schedule && schedule.length > 0) {
+                    const sortedSchedule = schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    nextMatch = sortedSchedule.find(match => new Date(match.date) > now);
+                }
+
+                if (nextMatch) {
+                    const matchDate = new Date(nextMatch.date);
+                    const formattedDate = matchDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                    const formattedTime = matchDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+                    upcomingMatchContainer.innerHTML = `
+                        <h2 class="text-2xl font-bold text-white mb-4">Upcoming Match</h2>
+                        <div class="text-center">
+                            <p class="text-lg font-medium">${formattedDate}</p>
+                            <p class="text-sm text-gray-400">${formattedTime}</p>
+                            <div class="flex items-center justify-center space-x-4 my-4">
+                                <span class="font-bold text-xl">${nextMatch.home ? 'GOTHAM FC' : nextMatch.opponent}</span>
+                                <span class="gotham-accent font-bold text-2xl">VS</span>
+                                <span class="font-bold text-xl">${nextMatch.home ? nextMatch.opponent : 'GOTHAM FC'}</span>
+                            </div>
+                            <p class="text-gray-300"><span class="font-semibold">Location:</span> ${nextMatch.location}</p>
+                            <p class="text-gray-300"><span class="font-semibold">Watch on:</span> ${nextMatch.broadcast}</p>
+                        </div>
+                    `;
+                } else {
+                    upcomingMatchContainer.innerHTML = `
+                        <h2 class="text-2xl font-bold text-white mb-4">Upcoming Match</h2>
+                        <p class="text-center text-gray-400">No upcoming matches scheduled.</p>
+                    `;
+                }
+            }
+
+            function renderStatsLeaders(stats) {
+                if(stats && stats.goalLeader && stats.assistLeader) {
+                     statsLeadersContainer.innerHTML = `
+                        <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
+                            <div>
+                                <p class="text-sm text-gray-400">Goal Leader</p>
+                                <p class="font-bold text-lg text-white">${stats.goalLeader.name}</p>
+                            </div>
+                            <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeader.total}</p>
+                        </div>
+                        <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
+                            <div>
+                                <p class="text-sm text-gray-400">Assist Leader</p>
+                                <p class="font-bold text-lg text-white">${stats.assistLeader.name}</p>
+                            </div>
+                            <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeader.total}</p>
+                        </div>
+                    `;
+                } else {
+                    statsLeadersContainer.innerHTML = `<p class="text-center text-gray-400">Team stats currently unavailable.</p>`;
+                }
+            }
+
+            function renderNews(news) {
+                 if(news && news.length > 0) {
+                    newsFeed.innerHTML = news.map(article => `
+                        <div class="border-b border-gotham-border pb-4 last:border-b-0">
+                            <p class="text-sm text-gray-400">${article.source} &bull; ${article.date}</p>
+                            <h3 class="text-lg font-semibold text-white mt-1">${article.title}</h3>
+                            <p class="text-gray-300 mt-1">${article.snippet}</p>
+                            <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="gotham-accent font-semibold text-sm hover:underline">Read Full Story &rarr;</a>
+                        </div>
+                    `).join('');
+                } else {
+                     newsFeed.innerHTML = `<p class="text-center text-gray-400">News feed is currently unavailable.</p>`;
+                }
+            }
+            
+            function renderSocial(social) {
+                 if(social && social.length > 0) {
+                    socialFeed.innerHTML = social.map(post => {
+                        if (post.type === 'instagram') {
+                            return `
+                                <div class="gotham-bg-highlight p-3 rounded-lg">
+                                    <p class="font-bold">${post.user} <span class="text-gray-400 font-normal">(${post.handle}) &bull; ${post.time}</span></p>
+                                    <img src="${post.image}" alt="Instagram post" class="rounded-md my-2 w-full h-auto object-cover">
+                                    <p class="text-white mt-1">${post.content}</p>
+                                </div>`;
+                        }
+                        // Default to twitter style
+                        return `
+                             <div class="gotham-bg-highlight p-3 rounded-lg">
+                                <p class="font-bold">${post.user} <span class="text-gray-400 font-normal">${post.handle} &bull; ${post.time}</span></p>
+                                <p class="text-white mt-1">${post.content}</p>
+                             </div>
+                        `;
+                    }).join('');
+                } else {
+                    socialFeed.innerHTML = `<p class="text-center text-gray-400">Social feed is currently unavailable.</p>`;
+                }
+            }
+
+            async function fetchAllData() {
+                try {
+                    // FIX: Changed URL from root-relative to relative to fix parsing issue in local/preview environments.
+                    const response = await fetch('.netlify/functions/get-gotham-data');
+                    const data = await response.json();
+                    
+                    renderUpcomingMatch(data.schedule);
+                    renderStatsLeaders(data.stats);
+                    renderNews(data.news);
+                    renderSocial(data.social);
+
+                } catch (error) {
+                    console.error('Error fetching site data:', error);
+                    upcomingMatchContainer.innerHTML = `<p class="text-red-400 text-center">Could not load site data.</p>`;
+                    statsLeadersContainer.innerHTML = '';
+                    newsFeed.innerHTML = '';
+                    socialFeed.innerHTML = '';
+                }
+            }
+
+            fetchAllData();
+        });
+    </script>
+</body>
+</html>
+

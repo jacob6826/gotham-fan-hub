@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gotham FC Team Roster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/custom-styles.css">
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between md:items-center mb-8">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                <svg class="h-12 w-12 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#87CEEB"/>
+                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#111827"/>
+                    <text x="50" y="62" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
+                </svg>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Team Roster</h1>
+                    <p class="text-lg gotham-accent font-medium">2025 Season Squad</p>
+                </div>
+            </div>
+             <a href="./index.html" class="gotham-button inline-block text-center py-2 px-5 rounded-lg font-bold">
+                &larr; Back to Hub
+            </a>
+        </header>
+
+        <!-- Main Content: Roster Grid -->
+        <main id="roster-container">
+            <p class="text-gray-400 w-full text-center">Loading roster...</p>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const rosterContainer = document.getElementById('roster-container');
+
+            function renderRoster(fullRoster) {
+                if (!fullRoster || fullRoster.length === 0) {
+                    rosterContainer.innerHTML = `<p class="text-center text-red-400">Roster data is currently unavailable.</p>`;
+                    return;
+                }
+
+                const positions = {
+                    'Forwards': 'FW',
+                    'Midfielders': 'MF',
+                    'Defenders': 'DF',
+                    'Goalkeepers': 'GK'
+                };
+                let html = '';
+
+                for (const [positionName, positionCode] of Object.entries(positions)) {
+                    html += `
+                        <section class="mb-10">
+                            <h2 class="text-2xl font-bold text-white border-b-2 border-gotham-border pb-2 mb-6">${positionName}</h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    `;
+                    
+                    const playersInPosition = fullRoster.filter(p => p.pos === positionCode);
+
+                    playersInPosition.forEach(player => {
+                        const placeholderText = player.name.split(' ').map(n => n[0]).join('');
+                        // Using a placeholder for images as the API doesn't provide them.
+                        const imageUrl = `https://placehold.co/150x150/374151/FFFFFF?text=${placeholderText}`;
+                        html += `
+                            <div class="gotham-bg rounded-xl shadow-lg p-5 text-center transition-transform hover:scale-105 border border-gotham-border">
+                                <img class="w-24 h-24 rounded-full mx-auto -mt-12 border-4 border-gotham-accent" src="${imageUrl}" alt="${player.name}">
+                                <p class="text-2xl font-bold gotham-accent mt-4">${player.num}</p>
+                                <h3 class="text-xl font-bold text-white mt-1">${player.name}</h3>
+                                <p class="text-gray-400 text-sm h-12">${player.bio}</p>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div></section>`;
+                }
+                rosterContainer.innerHTML = html;
+            }
+
+            async function fetchAndDisplayRoster() {
+                try {
+                    // This path works for both local preview and live deployment
+                    const response = await fetch('./.netlify/functions/get-gotham-data');
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    renderRoster(data.roster);
+                } catch (error) {
+                    rosterContainer.innerHTML = `<p class="text-center text-red-400">Could not load roster data. Please try again later.</p>`;
+                    console.error('Error fetching roster:', error);
+                }
+            }
+
+            fetchAndDisplayRoster();
+        });
+    </script>
+</body>
+</html>
+

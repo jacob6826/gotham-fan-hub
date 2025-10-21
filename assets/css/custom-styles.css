@@ -1,0 +1,40 @@
+/* Applying the Inter font and custom theme colors */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #111827; /* A dark cool gray, slightly softer than pure black */
+}
+
+/* Custom Gotham FC Colors */
+.gotham-bg { background-color: #1F2937; } /* Card background */
+.gotham-bg-highlight { background-color: #374151; } /* Highlighted rows or elements */
+.gotham-accent { color: #87CEEB; } /* Gotham's Sky Blue for accents */
+.gotham-border { border-color: #4B5563; }
+.gotham-button {
+    background-color: #87CEEB;
+    color: #111827;
+    transition: all 0.2s ease-in-out;
+}
+.gotham-button:hover {
+    background-color: #6fbde0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(135, 206, 235, 0.2);
+}
+
+/* Custom scrollbar for a better look */
+.news-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.news-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.news-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #4B5563; /* Border color */
+    border-radius: 10px;
+    border: 2px solid #111827; /* Padding around thumb to match body bg*/
+}
+ .news-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #6B7280;
+}
+
