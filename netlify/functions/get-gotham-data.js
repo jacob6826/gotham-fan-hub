@@ -1,17 +1,11 @@
 // This is a serverless function that will run on Netlify's servers.
 // Its job is to securely fetch data from external APIs and fall back to stored data if needed.
-const Parser = require('rss-parser');
-const parser = new Parser();
 
-// Helper function to process the official NWSL roster API data from the /roster endpoint
+// Helper function to process the official NWSL roster API data
 const processNWSLRosterData = (apiData) => {
-    // Check for the top-level 'players' array
-    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) {
-        console.error("Roster API data is missing the 'players' array.");
-        return [];
-    }
+    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { return []; }
     const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
-    const processedPlayers = activePlayers.map(player => {
+    return activePlayers.map(player => {
         try {
             if (!player || !player.mediaFirstName || !player.mediaLastName) return null;
             const position = player.roleLabel.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder');
@@ -24,7 +18,6 @@ const processNWSLRosterData = (apiData) => {
             };
         } catch (error) { return null; }
     }).filter(p => p !== null);
-    return processedPlayers;
 };
 
 // Helper function to process the official NWSL schedule API data
@@ -67,65 +60,18 @@ const processStandingsData = (apiData) => {
     };
 };
 
-// NEW: Helper function to process RSS feed data
-const processNewsData = (feeds) => {
-    let allItems = [];
-    feeds.forEach(feed => {
-        if (feed && feed.items) {
-            allItems = [...allItems, ...feed.items];
-        }
-    });
-
-    // Filter for relevant articles
-    const keywords = ['gotham fc', 'nwsl'];
-    const relevantItems = allItems.filter(item => {
-        const title = item.title?.toLowerCase() || '';
-        const content = item.contentSnippet?.toLowerCase() || '';
-        return keywords.some(keyword => title.includes(keyword) || content.includes(keyword));
-    });
-
-    // Sort by date, newest first
-    relevantItems.sort((a, b) => new Date(b.isoDate) - new Date(a.isoDate));
-    
-    // Format for the website
-    return relevantItems.slice(0, 20).map(item => ({
-        source: item.creator || item.author || new URL(item.link).hostname.replace('www.', ''),
-        date: new Date(item.isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        title: item.title,
-        snippet: item.contentSnippet?.substring(0, 150) + '...' || '',
-        url: item.link
-    }));
-};
-
 exports.handler = async function(event, context) {
     // --- API URLS ---
     const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c';
     const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
     const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general';
     const NWSL_STANDINGS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/standings/overall?locale=en-US&orderBy=rank&direction=asc';
-    const RSS_FEEDS = [
-        'https://www.espn.com/espn/rss/soccer/news',
-        'https://www.goal.com/en-us/feeds/news',
-        'https://www.hudsonriverblue.com/rss/index.xml'
-    ];
 
-    // Expanded fallback data for a better user experience
     const fallbackData = {
-        roster: [/* Your full roster fallback data here */],
+        roster: [/* Full roster data can be added here as a safety net */],
         schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
-        stats: { "goals-scored": { label: "Goals scored", value: 33 }, "goals-conceded": { label: "Goals conceded", value: 22 }, "Passing Accuracy": { label: "Passing Accuracy", value: 78.65 }, "Shooting Accuracy": { label: "Shooting Accuracy", value: 51.39 } },
-        standings: { rank: 3, points: 36, record: '9-7-9' },
-        news: [
-            { source: 'AP News', date: 'Oct 21, 2025', title: 'Gotham FC clinches NWSL playoff spot after 2-2 tie with Racing Louisville', snippet: 'Rose Lavelle scored the tying goal in the 85th minute and Gotham FC had a 2-2 draw with Racing Louisville...', url: 'https://apnews.com/article/gotham-fc-racing-louisville-angel-city-portland-thorns-nwsl-c4090318ff300cd12a8beaf02aa999b9' },
-            { source: 'The Equalizer', date: 'Oct 20, 2025', title: 'How Gotham FC’s rookie class became a legitimate X-factor', snippet: 'A deep rookie class is unusual in the NWSL, but Gotham FC has found major contributors from its newest players...', url: 'https://equalizersoccer.com/2025/10/20/gotham-fc-rookie-class-x-factor-nwsl-playoffs-analysis/' },
-            { source: 'Just Women\'s Sports', date: 'Oct 21, 2025', title: 'Rose Lavelle scores stunning free kick to lift Gotham to playoffs', snippet: 'The USWNT star stepped up in a crucial moment to deliver for her club team, securing a postseason berth.', url: 'https://justwomenssports.com/rose-lavelle-gotham-fc-free-kick-goal-playoffs-2025/' },
-            { source: 'Hudson River Blue', date: 'Oct 22, 2025', title: 'Three things we learned from Gotham FC’s playoff-clinching draw', snippet: 'It wasn\'t a perfect performance, but the Bats showed the grit and determination needed to compete in the playoffs...', url: 'https://www.hudsonriverblue.com/2025/10/22/3-things-gotham-fc-playoff-draw-analysis/' },
-            { source: 'ESPN', date: 'Oct 21, 2025', title: 'NWSL Decision Day: What\'s at stake for Gotham FC and the rest of the league?', snippet: 'A look at the playoff scenarios and potential matchups as the NWSL regular season comes to a close.', url: 'https://www.espn.com/soccer/story/_/id/39483321/nwsl-decision-day-playoff-scenarios-gotham-fc' }
-        ],
-        social: [
-             { user: "Gotham FC", handle: "@GothamFC", time: "2h", type: "twitter", content: "PLAYOFFS CLINCHED. This team never quits. Thank you to the best fans in the league for your support! 🦇 #NWSL #GothamFC" },
-            { user: "Rose Lavelle", handle: "@roselavelle", time: "5h", type: "instagram", image: "https://placehold.co/600x400/111827/87CEEB?text=Game+Day!", content: "Big game tonight. Ready to leave it all on the field. Let's go! 💪" }
-        ]
+        stats: { "goals-scored": { label: "Goals scored", value: 'N/A' }, "goals-conceded": { label: "Goals conceded", value: 'N/A' } },
+        standings: { rank: 'N/A', points: 'N/A', record: 'N/A' },
     };
     
     async function fetchData(url, processor, fallback) {
@@ -143,32 +89,18 @@ exports.handler = async function(event, context) {
             return fallback;
         }
     }
-    
-    // NEW: Function to fetch live news from RSS feeds
-    async function fetchLiveNews() {
-        try {
-            const feedPromises = RSS_FEEDS.map(feedUrl => parser.parseURL(feedUrl));
-            const feeds = await Promise.all(feedPromises);
-            const processedNews = processNewsData(feeds);
-            if (processedNews.length === 0) throw new Error("No relevant news found in RSS feeds.");
-            return processedNews;
-        } catch (error) {
-            console.error('Failed to fetch live news from RSS, using fallback.', error);
-            return fallbackData.news;
-        }
-    }
 
-    const [roster, schedule, stats, standings, news] = await Promise.all([
+    const [roster, schedule, stats, standings] = await Promise.all([
         fetchData(NWSL_ROSTER_API_URL, processNWSLRosterData, fallbackData.roster),
         fetchData(NWSL_SCHEDULE_API_URL, processScheduleData, fallbackData.schedule),
         fetchData(NWSL_STATS_API_URL, processStatsData, fallbackData.stats),
-        fetchData(NWSL_STANDINGS_API_URL, processStandingsData, fallbackData.standings),
-        fetchLiveNews()
+        fetchData(NWSL_STANDINGS_API_URL, processStandingsData, fallbackData.standings)
     ]);
     
+    // News and social are no longer part of the API response
     return {
         statusCode: 200,
-        body: JSON.stringify({ roster, schedule, stats, standings, news, social: fallbackData.social })
+        body: JSON.stringify({ roster, schedule, stats, standings })
     };
 };
 
