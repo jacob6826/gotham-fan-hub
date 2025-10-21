@@ -28,7 +28,7 @@ const processScheduleData = (apiData) => {
     return gothamMatches.map(match => {
         const isHomeGame = match.homeTeam.name === "NJ/NY Gotham FC";
         return {
-            opponent: isHomeGame ? match.awayTeam.name : match.awayTeam.name,
+            opponent: isHomeGame ? match.awayTeam.name : match.homeTeam.name,
             date: match.matchDate,
             location: match.venue.name,
             broadcast: match.broadcasts && match.broadcasts.length > 0 ? match.broadcasts.map(b => b.network.name).join(', ') : "TBD",
@@ -79,11 +79,21 @@ const processStatsData = (statsResponses) => {
 
 
 exports.handler = async function(event, context) {
-    const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/profile?locale=en-US';
-    const NWSL_SCHEDULE_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28';
-    const NWSL_STATS_BASE_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=';
+    // --- DYNAMIC DATE CALCULATION ---
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setMonth(today.getMonth() + 6); // Look 6 months into the future
+    
+    // Format dates to YYYY-MM-DD for the API
+    const formatDate = (date) => date.toISOString().split('T')[0];
+    const startDate = formatDate(today);
+    const endDate = formatDate(futureDate);
 
-    // Placeholder data remains as a robust fallback
+    // --- API URLS ---
+    const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/profile?locale=en-US';
+    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=${startDate}&endDate=${endDate}`;
+    const NWSL_STATS_BASE_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=';
+    
     const fallbackData = {
         roster: [/* Full roster data */],
         schedule: [/* Schedule data */],
