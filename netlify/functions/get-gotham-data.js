@@ -2,15 +2,11 @@
 // Its job is to securely fetch data from external APIs and fall back to stored data if needed.
 const google = require('google-it');
 
-// Helper function to process the official NWSL roster API data from the /roster endpoint
+// Helper function to process the official NWSL roster API data
 const processNWSLRosterData = (apiData) => {
-    // Check for the top-level 'players' array
-    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) {
-        console.error("Roster API data is missing the 'players' array.");
-        return [];
-    }
+    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { return []; }
     const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
-    const processedPlayers = activePlayers.map(player => {
+    return activePlayers.map(player => {
         try {
             if (!player || !player.mediaFirstName || !player.mediaLastName) return null;
             const position = player.roleLabel.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder');
@@ -21,23 +17,14 @@ const processNWSLRosterData = (apiData) => {
                 num: player.bibNumber || 'N/A',
                 bio: `${position} from ${player.nationality || 'N/A'}`
             };
-        } catch (error) {
-            console.error("Error processing a single player entry:", player, error);
-            return null;
-        }
-    });
-    return processedPlayers.filter(p => p !== null);
+        } catch (error) { return null; }
+    }).filter(p => p !== null);
 };
 
 // Helper function to process the official NWSL schedule API data
 const processScheduleData = (apiData) => {
-    if (!apiData || !apiData.matches || !Array.isArray(apiData.matches)) { 
-        console.error("Schedule API data is missing the 'matches' array.");
-        return []; 
-    }
-    const gothamMatches = apiData.matches.filter(match => 
-        match.home.shortName === "Gotham FC" || match.away.shortName === "Gotham FC"
-    );
+    if (!apiData || !apiData.matches || !Array.isArray(apiData.matches)) { return []; }
+    const gothamMatches = apiData.matches.filter(match => match.home.shortName === "Gotham FC" || match.away.shortName === "Gotham FC");
     return gothamMatches.map(match => {
         const isHomeGame = match.home.shortName === "Gotham FC";
         const opponent = isHomeGame ? match.away.shortName : match.home.shortName;
@@ -47,22 +34,13 @@ const processScheduleData = (apiData) => {
         if (broadcasters.broadcasterNational2) networks.push(broadcasters.broadcasterNational2.split('|')[0]);
         if (broadcasters.broadcasterNational3) networks.push(broadcasters.broadcasterNational3.split('|')[0]);
         const broadcastInfo = networks.length > 0 ? networks.join(', ') : "TBD";
-        return {
-            opponent: opponent,
-            date: match.matchDateUtc,
-            location: match.stadiumName,
-            broadcast: broadcastInfo,
-            home: isHomeGame
-        };
+        return { opponent, date: match.matchDateUtc, location: match.stadiumName, broadcast: broadcastInfo, home: isHomeGame };
     });
 };
 
 // Helper function to process the NWSL GENERAL stats API data
 const processStatsData = (apiData) => {
-    if (!apiData || !apiData.team || !apiData.team.stats) { 
-        console.error("Stats API data is missing the 'team.stats' array.");
-        return null; 
-    }
+    if (!apiData || !apiData.team || !apiData.team.stats) { return null; }
     const statsArray = apiData.team.stats;
     const statsObj = {};
     statsArray.forEach(stat => {
@@ -71,7 +49,19 @@ const processStatsData = (apiData) => {
     return statsObj;
 };
 
-// Helper function to process news search results
+// Helper function to process the NWSL standings API data
+const processStandingsData = (apiData) => {
+    if (!apiData || !apiData.data || !apiData.data.standings) { return null; }
+    const gothamStanding = apiData.data.standings.find(team => team.team.name === 'NJ/NY Gotham FC');
+    if (!gothamStanding) { return null; }
+    return {
+        rank: gothamStanding.rank,
+        points: gothamStanding.points,
+        record: `${gothamStanding.wins}-${gothamStanding.losses}-${gothamStanding.draws}`
+    };
+};
+
+// Helper function to process news search results from google-it
 const processNewsData = (searchData) => {
     if (!searchData || searchData.length === 0) return [];
     return searchData.map(article => {
@@ -99,10 +89,14 @@ exports.handler = async function(event, context) {
     const fallbackData = {
         roster: [/* Full roster data */],
         schedule: [/* Schedule data */],
-        stats: { "goals-scored": { label: "Goals scored", value: 33 }, "goals-conceded": { label: "Goals conceded", value: 22 }, "Passing Accuracy": { label: "Passing Accuracy", value: 78.65 }, "Shooting Accuracy": { label: "Shooting Accuracy", value: 51.39 } },
+        stats: { "goals-scored": { label: "Goals scored", value: 33 } },
         standings: { rank: 3, points: 36, record: '9-7-9' },
-        news: [/* News data */],
-        social: [/* Social data */]
+        news: [
+            { source: 'The Athletic', date: 'Oct 21, 2025', title: 'Deep Dive: The Tactical Genius Behind Gotham\'s Midfield', snippet: 'Juan Carlos Amorós has built a formidable midfield trio...', url: 'https://theathletic.com/nwsl/' }
+        ],
+        social: [
+            { user: "Gotham FC", handle: "@GothamFC", time: "2h", type: "twitter", content: "PLAYOFFS CLINCHED." }
+        ]
     };
     
     async function fetchData(url, processor, fallback) {
@@ -124,24 +118,14 @@ exports.handler = async function(event, context) {
     async function fetchLiveNews() {
         try {
             const searchResults = await google({ query: "latest Gotham FC news", limit: 10 });
-            return processNewsData(searchResults);
+            const processedNews = processNewsData(searchResults);
+            if(processedNews.length === 0) throw new Error("No news found from search.");
+            return processedNews;
         } catch (error) {
             console.error('Failed to fetch live news, using fallback.', error);
             return fallbackData.news;
         }
     }
-
-    // Process Standings requires a separate function because its structure is different
-    const processStandingsData = (apiData) => {
-        if (!apiData || !apiData.data || !apiData.data.standings) { return null; }
-        const gothamStanding = apiData.data.standings.find(team => team.team.name === 'NJ/NY Gotham FC');
-        if (!gothamStanding) { return null; }
-        return {
-            rank: gothamStanding.rank,
-            points: gothamStanding.points,
-            record: `${gothamStanding.wins}-${gothamStanding.losses}-${gothamStanding.draws}`
-        };
-    };
 
     const [roster, schedule, stats, standings, news] = await Promise.all([
         fetchData(NWSL_ROSTER_API_URL, processNWSLRosterData, fallbackData.roster),
