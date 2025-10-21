@@ -11,10 +11,7 @@ const normalizeName = (name) => {
 
 // Helper function to process the official NWSL roster API data and enrich it with sheet data
 const processNWSLRosterData = (apiData, enrichmentData) => {
-    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { 
-        console.error("Roster API data is missing the 'players' array.");
-        return []; 
-    }
+    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { return []; }
     const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
     
     return activePlayers.map(player => {
