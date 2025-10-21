@@ -282,11 +282,20 @@
                     allNews = data.news || [];
                     allSocial = data.social || [];
                     
+                    // Clear loading messages and render content, or show empty message
                     newsFeedContent.innerHTML = '';
-                    socialFeedContent.innerHTML = '';
+                    if (allNews.length > 0) {
+                        newsCursor = loadMore(newsFeedContent, allNews, 0, renderNewsItem);
+                    } else {
+                        newsFeedContent.innerHTML = `<p class="text-center text-gray-400">No news available.</p>`;
+                    }
 
-                    newsCursor = loadMore(newsFeedContent, allNews, 0, renderNewsItem);
-                    socialCursor = loadMore(socialFeedContent, allSocial, 0, renderSocialItem);
+                    socialFeedContent.innerHTML = '';
+                    if (allSocial.length > 0) {
+                        socialCursor = loadMore(socialFeedContent, allSocial, 0, renderSocialItem);
+                    } else {
+                        socialFeedContent.innerHTML = `<p class="text-center text-gray-400">Social feed unavailable.</p>`;
+                    }
 
                 } catch (error) {
                     console.error('Error fetching site data:', error);
