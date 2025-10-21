@@ -1,6 +1,6 @@
 // This is a serverless function that will run on Netlify's servers.
 // Its job is to securely fetch data from external APIs and fall back to stored data if needed.
-const { google_search } = require('@googleapis/search');
+const google = require('google-it');
 
 // Helper function to process the official NWSL roster API data
 const processNWSLRosterData = (apiData) => {
@@ -51,54 +51,54 @@ const processStatsData = (apiData) => {
     };
 };
 
-// NEW: Helper function to process news search results
+// Helper function to process news search results from google-it
 const processNewsData = (searchData) => {
     if (!searchData || searchData.length === 0) {
         return [];
     }
     return searchData.map(article => {
-        // Attempt to extract a clean source name from the URL
         let sourceName = 'News Source';
         try {
-            const url = new URL(article.url);
+            const url = new URL(article.link);
             sourceName = url.hostname.replace('www.', '').split('.')[0];
-            // Capitalize first letter
             sourceName = sourceName.charAt(0).toUpperCase() + sourceName.slice(1);
         } catch (e) {
-            // Use the provided source title if URL parsing fails
-            sourceName = article.source_title || 'News Source';
+            sourceName = article.title || 'News Source';
         }
 
-        // Format date
-        const articleDate = new Date(article.publication_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        // Use current date as publication time is not available from this library
+        const articleDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
         return {
             source: sourceName,
             date: articleDate,
-            title: article.source_title,
+            title: article.title,
             snippet: article.snippet,
-            url: article.url
+            url: article.link
         };
     });
 };
 
 
 exports.handler = async function(event, context) {
-    // --- API URLS (Using fixed date range for stability) ---
+    // --- API URLS ---
     const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/profile?locale=en-US';
     const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
     const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=standard';
     
     // Fallback data is a safety net in case an API fails
     const fallbackData = {
-        roster: [ /* Full roster data */ ],
-        schedule: [ /* Schedule data */ ],
+        roster: [
+            { name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Veteran German international known for her shot-stopping." }
+        ],
+        schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
         stats: { goalLeader: { name: 'Esther González', total: 9 }, assistLeader: { name: 'Rose Lavelle', total: 6 } },
         news: [
-            { source: 'The Athletic', date: 'Oct 21, 2025', title: 'Deep Dive: The Tactical Genius Behind Gotham\'s Midfield', snippet: 'Juan Carlos Amorós has built a formidable midfield trio. We break down the X\'s and O\'s...', url: 'https://theathletic.com/nwsl/' },
-            { source: 'AP News', date: 'Oct 21, 2025', title: 'Gotham FC Clinches Playoff Spot with Gritty Draw', snippet: 'Rose Lavelle\'s late-game heroics secured a crucial point for Gotham, ensuring their spot in the NWSL postseason.', url: 'https://apnews.com/hub/nwsl' },
+            { source: 'The Athletic', date: 'Oct 21, 2025', title: 'Deep Dive: The Tactical Genius Behind Gotham\'s Midfield', snippet: 'Juan Carlos Amorós has built a formidable midfield trio...', url: 'https://theathletic.com/nwsl/' }
         ],
-        social: [ /* Social data */ ]
+        social: [
+            { user: "Gotham FC", handle: "@GothamFC", time: "2h", type: "twitter", content: "PLAYOFFS CLINCHED." }
+        ]
     };
     
     async function fetchData(url, processor, fallback) {
@@ -117,12 +117,11 @@ exports.handler = async function(event, context) {
         }
     }
     
-    // NEW: Function to fetch live news
+    // Updated Function to fetch live news using google-it
     async function fetchLiveNews() {
         try {
-            const searchResults = await google_search.search({queries: ["latest Gotham FC news"]});
-            const articles = searchResults[0].results;
-            const processedNews = processNewsData(articles);
+            const searchResults = await google({ query: "latest Gotham FC news", limit: 10 });
+            const processedNews = processNewsData(searchResults);
             if (processedNews.length === 0) throw new Error("No news articles found.");
             return processedNews;
         } catch (error) {
