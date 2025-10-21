@@ -1,12 +1,17 @@
 // This is a serverless function that will run on Netlify's servers.
 // Its job is to securely fetch data from external APIs and fall back to stored data if needed.
-const google = require('google-it');
+const Parser = require('rss-parser');
+const parser = new Parser();
 
-// Helper function to process the official NWSL roster API data
+// Helper function to process the official NWSL roster API data from the /roster endpoint
 const processNWSLRosterData = (apiData) => {
-    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { return []; }
+    // Check for the top-level 'players' array
+    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) {
+        console.error("Roster API data is missing the 'players' array.");
+        return [];
+    }
     const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
-    return activePlayers.map(player => {
+    const processedPlayers = activePlayers.map(player => {
         try {
             if (!player || !player.mediaFirstName || !player.mediaLastName) return null;
             const position = player.roleLabel.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder');
@@ -19,6 +24,7 @@ const processNWSLRosterData = (apiData) => {
             };
         } catch (error) { return null; }
     }).filter(p => p !== null);
+    return processedPlayers;
 };
 
 // Helper function to process the official NWSL schedule API data
@@ -61,21 +67,34 @@ const processStandingsData = (apiData) => {
     };
 };
 
-// Helper function to process news search results from google-it
-const processNewsData = (searchData) => {
-    if (!searchData || searchData.length === 0) return [];
-    return searchData.map(article => {
-        let sourceName = 'News';
-        try {
-            const url = new URL(article.link);
-            sourceName = url.hostname.replace('www.', '').split('.')[0];
-            sourceName = sourceName.charAt(0).toUpperCase() + sourceName.slice(1);
-        } catch (e) {
-            sourceName = article.title || 'News';
+// NEW: Helper function to process RSS feed data
+const processNewsData = (feeds) => {
+    let allItems = [];
+    feeds.forEach(feed => {
+        if (feed && feed.items) {
+            allItems = [...allItems, ...feed.items];
         }
-        const articleDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        return { source: sourceName, date: articleDate, title: article.title, snippet: article.snippet, url: article.link };
     });
+
+    // Filter for relevant articles
+    const keywords = ['gotham fc', 'nwsl'];
+    const relevantItems = allItems.filter(item => {
+        const title = item.title?.toLowerCase() || '';
+        const content = item.contentSnippet?.toLowerCase() || '';
+        return keywords.some(keyword => title.includes(keyword) || content.includes(keyword));
+    });
+
+    // Sort by date, newest first
+    relevantItems.sort((a, b) => new Date(b.isoDate) - new Date(a.isoDate));
+    
+    // Format for the website
+    return relevantItems.slice(0, 20).map(item => ({
+        source: item.creator || item.author || new URL(item.link).hostname.replace('www.', ''),
+        date: new Date(item.isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        title: item.title,
+        snippet: item.contentSnippet?.substring(0, 150) + '...' || '',
+        url: item.link
+    }));
 };
 
 exports.handler = async function(event, context) {
@@ -84,19 +103,22 @@ exports.handler = async function(event, context) {
     const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
     const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general';
     const NWSL_STANDINGS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/standings/overall?locale=en-US&orderBy=rank&direction=asc';
+    const RSS_FEEDS = [
+        'https://www.espn.com/espn/rss/soccer/news',
+        'https://www.goal.com/en-us/feeds/news',
+        'https://www.hudsonriverblue.com/rss/index.xml'
+    ];
 
     // Fallback data is a safety net
     const fallbackData = {
-        roster: [/* Full roster data */],
-        schedule: [/* Schedule data */],
-        stats: { "goals-scored": { label: "Goals scored", value: 33 } },
+        roster: [/* Your full roster fallback data here */],
+        schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
+        stats: { "goals-scored": { label: "Goals scored", value: 33 }, "goals-conceded": { label: "Goals conceded", value: 22 }, "Passing Accuracy": { label: "Passing Accuracy", value: 78.65 }, "Shooting Accuracy": { label: "Shooting Accuracy", value: 51.39 } },
         standings: { rank: 3, points: 36, record: '9-7-9' },
         news: [
-            { source: 'The Athletic', date: 'Oct 21, 2025', title: 'Deep Dive: The Tactical Genius Behind Gotham\'s Midfield', snippet: 'Juan Carlos Amorós has built a formidable midfield trio...', url: 'https://theathletic.com/nwsl/' }
+            { source: 'The Athletic', date: 'Oct 21, 2025', title: 'Deep Dive: The Tactical Genius Behind Gotham\'s Midfield', snippet: 'Juan Carlos Amorós has built a formidable midfield trio...', url: 'https://theathletic.com/512345/gotham-fc-tactics/' }
         ],
-        social: [
-            { user: "Gotham FC", handle: "@GothamFC", time: "2h", type: "twitter", content: "PLAYOFFS CLINCHED." }
-        ]
+        social: [/* Your social feed fallback data here */]
     };
     
     async function fetchData(url, processor, fallback) {
@@ -115,14 +137,16 @@ exports.handler = async function(event, context) {
         }
     }
     
+    // NEW: Function to fetch live news from RSS feeds
     async function fetchLiveNews() {
         try {
-            const searchResults = await google({ query: "latest Gotham FC news", limit: 10 });
-            const processedNews = processNewsData(searchResults);
-            if(processedNews.length === 0) throw new Error("No news found from search.");
+            const feedPromises = RSS_FEEDS.map(feedUrl => parser.parseURL(feedUrl));
+            const feeds = await Promise.all(feedPromises);
+            const processedNews = processNewsData(feeds);
+            if (processedNews.length === 0) throw new Error("No relevant news found in RSS feeds.");
             return processedNews;
         } catch (error) {
-            console.error('Failed to fetch live news, using fallback.', error);
+            console.error('Failed to fetch live news from RSS, using fallback.', error);
             return fallbackData.news;
         }
     }
