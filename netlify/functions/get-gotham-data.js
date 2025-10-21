@@ -1,6 +1,16 @@
 // This is a serverless function that will run on Netlify's servers.
 // Its job is to securely fetch data from an external API.
 
+// Helper function to get the correct, standard position code.
+const getPositionCode = (positionName) => {
+    const name = positionName.toLowerCase();
+    if (name.includes('forward')) return 'FW';
+    if (name.includes('midfielder')) return 'MF';
+    if (name.includes('defender')) return 'DF';
+    if (name.includes('goalkeeper')) return 'GK';
+    return 'UNK'; // Fallback for any unknown positions
+};
+
 // Roster processor for the official NWSL API data
 const processNWSLRosterData = (apiData) => {
     if (!apiData || !apiData.data || !apiData.data.squad) return [];
@@ -9,7 +19,7 @@ const processNWSLRosterData = (apiData) => {
         const jerseyStat = player.stats.find(stat => stat.name === 'number');
         return {
             name: player.participant.name,
-            pos: player.position.name.substring(0, 2).toUpperCase().replace('AL','GK'), // GOALKEEPER -> GK
+            pos: getPositionCode(player.position.name), // This line has been updated
             num: jerseyStat ? jerseyStat.value : 'N/A',
             bio: `${player.position.name} from ${player.participant.country.name}`
         };
@@ -111,4 +121,3 @@ exports.handler = async function(event, context) {
         body: JSON.stringify(responseData)
     };
 };
-
