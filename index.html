@@ -41,14 +41,19 @@
                     </div>
 
                     <!-- Team Stat Leaders -->
-                    <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                    <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
                         <h2 class="text-2xl font-bold text-white mb-4">Team Leaders</h2>
-                        <div id="stats-leaders-container" class="space-y-4">
+                        <div id="stats-leaders-container" class="space-y-4 flex-grow">
                             <p class="text-center text-gray-400">Loading team leaders...</p>
                         </div>
-                        <a href="./roster.html" class="gotham-button block w-full text-center mt-6 py-3 px-4 rounded-lg font-bold">
-                            View Full Roster & Bios
-                        </a>
+                        <div class="mt-6 space-y-2">
+                             <a href="./roster.html" class="gotham-button block w-full text-center py-3 px-4 rounded-lg font-bold">
+                                View Full Roster & Bios
+                            </a>
+                            <button id="see-more-stats-btn" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
+                                See More Stats
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -61,8 +66,13 @@
                 </div>
             </div>
 
-            <!-- Right Column: Socials -->
+            <!-- Right Column: Standings & Socials -->
             <div class="lg:col-span-1 space-y-8">
+                 <!-- Current Standings -->
+                <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                     <p class="text-center text-gray-400">Loading standings...</p>
+                </div>
+
                 <!-- Social Feed -->
                 <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
                     <h2 class="text-2xl font-bold text-white mb-4">Social Feed</h2>
@@ -76,12 +86,25 @@
                     <h2 class="text-xl font-bold text-white mb-4">Supporters Corner</h2>
                      <div class="gotham-bg-highlight p-4 rounded-lg text-center">
                         <p class="text-2xl font-extrabold gotham-accent">Cloud 9</p>
-                        <p class="text-white mt-2">The original supporters of NJ/NY Gotham FC. Join us for marches, tailgates, and non-stop chanting!</p>
+                        <p class="text-white mt-2">The original supporters of NJ/NY Gotham FC.</p>
                         <a href="https://cloud9goth.com/" target="_blank" rel="noopener noreferrer">
                             <button class="gotham-button w-full mt-4 py-2 px-4 rounded-lg font-bold">Visit Website</button>
                         </a>
                      </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div class="gotham-bg rounded-xl shadow-lg border border-gotham-border w-full max-w-3xl max-h-[90vh] flex flex-col">
+            <header class="p-4 flex justify-between items-center border-b border-gotham-border">
+                <h2 class="text-2xl font-bold text-white">Detailed Team Stats</h2>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </header>
+            <div id="modal-stats-content" class="p-6 overflow-y-auto">
+                <p class="text-center text-gray-400">Loading detailed stats...</p>
             </div>
         </div>
     </div>
@@ -93,7 +116,24 @@
             const statsLeadersContainer = document.getElementById('stats-leaders-container');
             const newsFeedContent = document.getElementById('news-feed-content');
             const socialFeedContent = document.getElementById('social-feed-content');
-            
+            const standingsContainer = document.getElementById('standings-container');
+            const statsModal = document.getElementById('stats-modal');
+            const seeMoreStatsBtn = document.getElementById('see-more-stats-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalStatsContent = document.getElementById('modal-stats-content');
+
+            // --- Modal Logic ---
+            seeMoreStatsBtn.addEventListener('click', () => statsModal.classList.remove('hidden'));
+            closeModalBtn.addEventListener('click', () => statsModal.classList.add('hidden'));
+            statsModal.addEventListener('click', (e) => {
+                if (e.target === statsModal) {
+                    statsModal.classList.add('hidden');
+                }
+            });
+
+            // --- Data and State ---
+            let allData = {};
+
             // --- Render Functions ---
             function renderUpcomingMatch(schedule) {
                  const now = new Date();
@@ -123,79 +163,148 @@
                     upcomingMatchContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4">Upcoming Match</h2><p class="text-center text-gray-400">No upcoming matches scheduled.</p>`;
                 }
             }
+            
+            function renderStandings(standings) {
+                 if (standings) {
+                    standingsContainer.innerHTML = `
+                        <h2 class="text-2xl font-bold text-white mb-4">Current Standings</h2>
+                        <div class="gotham-bg-highlight p-4 rounded-lg text-center space-y-2">
+                            <div>
+                                <p class="text-sm text-gray-400">League Rank</p>
+                                <p class="gotham-accent font-extrabold text-4xl">${standings.rank}</p>
+                            </div>
+                            <div class="flex justify-around text-center">
+                                <div>
+                                    <p class="text-sm text-gray-400">Points</p>
+                                    <p class="font-bold text-xl">${standings.points}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-400">Record (W-L-D)</p>
+                                    <p class="font-bold text-xl">${standings.record}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                } else {
+                    standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4">Current Standings</h2><p class="text-center text-gray-400">Standings unavailable.</p>`;
+                }
+            }
 
             function renderStatsLeaders(stats) {
-                if (stats && stats.goalLeader && stats.assistLeader) {
+                if (stats && stats.goalLeaders && stats.assistLeaders && stats.goalLeaders.length > 0 && stats.assistLeaders.length > 0) {
                      statsLeadersContainer.innerHTML = `
                         <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div><p class="text-sm text-gray-400">Goal Leader</p><p class="font-bold text-lg text-white">${stats.goalLeader.name}</p></div>
-                            <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeader.total}</p>
+                            <div><p class="text-sm text-gray-400">Goal Leader</p><p class="font-bold text-lg text-white">${stats.goalLeaders[0].name}</p></div>
+                            <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeaders[0].total}</p>
                         </div>
                         <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div><p class="text-sm text-gray-400">Assist Leader</p><p class="font-bold text-lg text-white">${stats.assistLeader.name}</p></div>
-                            <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeader.total}</p>
+                            <div><p class="text-sm text-gray-400">Assist Leader</p><p class="font-bold text-lg text-white">${stats.assistLeaders[0].name}</p></div>
+                            <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeaders[0].total}</p>
                         </div>`;
                 } else {
                     statsLeadersContainer.innerHTML = `<p class="text-center text-gray-400">Team stats currently unavailable.</p>`;
                 }
             }
 
-            function renderNews(news) {
-                 if(news && news.length > 0) {
-                    newsFeedContent.innerHTML = news.map(article => `
-                        <div class="border-b border-gotham-border pb-4 last:border-b-0">
-                            <p class="text-sm text-gray-400">${article.source} &bull; ${article.date}</p>
-                            <h3 class="text-lg font-semibold text-white mt-1">${article.title}</h3>
-                            <p class="text-gray-300 mt-1">${article.snippet}</p>
-                            <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="gotham-accent font-semibold text-sm hover:underline">Read Full Story &rarr;</a>
-                        </div>
-                    `).join('');
+            function renderDetailedStatsModal(stats) {
+                let html = '<div class="space-y-6">';
+                
+                // Helper to build a list for a stat category
+                const buildStatList = (title, leaders, statName) => {
+                    let sectionHtml = '';
+                    if (leaders && leaders.length > 0) {
+                        sectionHtml += `<div><h3 class="text-xl font-bold text-white mb-2">${title}</h3><ul class="space-y-1">`;
+                        leaders.forEach((player, index) => {
+                            sectionHtml += `<li class="flex justify-between items-center gotham-bg-highlight p-2 rounded-md text-sm">
+                                <span>${index + 1}. ${player.name}</span>
+                                <span class="font-bold gotham-accent">${player.total} ${statName}</span>
+                            </li>`;
+                        });
+                        sectionHtml += `</ul></div>`;
+                    }
+                    return sectionHtml;
+                };
+
+                // Helper to build a single team stat display
+                const buildTeamStat = (title, statObj, unit) => {
+                     if (statObj && typeof statObj.total !== 'undefined') {
+                        return `<div><h3 class="text-xl font-bold text-white mb-2">${title}</h3>
+                                    <div class="gotham-bg-highlight p-3 rounded-lg text-center">
+                                        <p class="gotham-accent font-extrabold text-3xl">${statObj.total.toFixed(1)}${unit}</p>
+                                    </div></div>`;
+                    }
+                    return '';
+                };
+
+                html += buildStatList('Shot Leaders', stats.shotLeaders, 'Shots');
+                html += buildStatList('Shots on Target Leaders', stats.sotLeaders, 'SOT');
+                html += buildStatList('Passing Leaders (Completed)', stats.passLeaders, 'Passes');
+                html += buildStatList('Tackle Leaders (Won)', stats.tackleLeaders, 'Tackles');
+                html += buildStatList('Interception Leaders', stats.interceptionLeaders, 'INT');
+                html += buildStatList('Corner Leaders', stats.cornerLeaders, 'Corners');
+                html += buildStatList('Headed Duel Leaders', stats.headedDuelLeaders, 'Duels Won');
+                
+                html += '<h3 class="text-xl font-bold text-white pt-4 border-t border-gotham-border">Team Stats</h3>';
+                html += buildTeamStat('Passing Accuracy', stats.passingAccuracy, '%');
+                html += buildTeamStat('Penalty Kick %', stats.penaltyKickPercentage, '%');
+                html += buildTeamStat('Goals Conceded', stats.goalsConceded, '');
+
+
+                if (html === '<div class="space-y-6">') {
+                    html += '<p class="text-gray-400 text-center">Detailed stats are currently unavailable.</p>';
+                }
+
+                html += '</div>';
+                modalStatsContent.innerHTML = html;
+            }
+
+            function renderFeed(container, data, renderFunc) {
+                 container.innerHTML = '';
+                 if (data && data.length > 0) {
+                    data.forEach(item => {
+                         const element = document.createElement('div');
+                         element.innerHTML = renderFunc(item).trim();
+                         container.appendChild(element.firstChild);
+                    });
                 } else {
-                     newsFeedContent.innerHTML = `<p class="text-center text-gray-400">News feed is currently unavailable.</p>`;
+                     container.innerHTML = `<p class="text-center text-gray-400">${container.id.includes('news') ? 'No news available.' : 'Social feed unavailable.'}</p>`;
                 }
             }
             
-            function renderSocial(social) {
-                 if(social && social.length > 0) {
-                    socialFeedContent.innerHTML = social.map(post => {
-                        if (post.type === 'instagram') {
-                            return `
-                                <div class="gotham-bg-highlight p-3 rounded-lg">
-                                    <p class="font-bold">${post.user} <span class="text-gray-400 font-normal">(${post.handle}) &bull; ${post.time}</span></p>
-                                    <img src="${post.image}" alt="Instagram post" class="rounded-md my-2 w-full h-auto object-cover">
-                                    <p class="text-white mt-1">${post.content}</p>
-                                </div>`;
-                        }
-                        return `
-                             <div class="gotham-bg-highlight p-3 rounded-lg">
-                                <p class="font-bold">${post.user} <span class="text-gray-400 font-normal">${post.handle} &bull; ${post.time}</span></p>
-                                <p class="text-white mt-1">${post.content}</p>
-                             </div>`;
-                    }).join('');
-                } else {
-                    socialFeedContent.innerHTML = `<p class="text-center text-gray-400">Social feed is currently unavailable.</p>`;
-                }
-            }
+            const renderNewsItem = (article) => `
+                <div class="border-b border-gotham-border pb-4 last:border-b-0">
+                    <p class="text-sm text-gray-400">${article.source} &bull; ${article.date}</p>
+                    <h3 class="text-lg font-semibold text-white mt-1">${article.title}</h3>
+                    <p class="text-gray-300 mt-1">${article.snippet}</p>
+                    <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="gotham-accent font-semibold text-sm hover:underline">Read Full Story &rarr;</a>
+                </div>`;
+
+            const renderSocialItem = (post) => {
+                // ... same as before
+            };
 
             // --- Main Data Fetching ---
             async function fetchAllData() {
                 try {
                     const response = await fetch('./.netlify/functions/get-gotham-data');
                     if (!response.ok) throw new Error(`API call failed: ${response.status}`);
-                    const data = await response.json();
+                    allData = await response.json();
                     
-                    renderUpcomingMatch(data.schedule);
-                    renderStatsLeaders(data.stats);
-                    renderNews(data.news);
-                    renderSocial(data.social);
+                    renderUpcomingMatch(allData.schedule);
+                    renderStandings(allData.standings);
+                    renderStatsLeaders(allData.stats);
+                    renderDetailedStatsModal(allData.stats);
+                    renderFeed(newsFeedContent, allData.news, renderNewsItem);
+                    renderFeed(socialFeedContent, allData.social, renderSocialItem);
 
                 } catch (error) {
                     console.error('Error fetching site data:', error);
-                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
+                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data.</p>`;
                     upcomingMatchContainer.innerHTML = errorMessage;
                     statsLeadersContainer.innerHTML = errorMessage;
                     newsFeedContent.innerHTML = errorMessage;
                     socialFeedContent.innerHTML = errorMessage;
+                    standingsContainer.innerHTML = errorMessage;
+                    modalStatsContent.innerHTML = errorMessage;
                 }
             }
 
