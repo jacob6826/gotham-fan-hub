@@ -18,7 +18,7 @@
         <header class="flex flex-col md:flex-row justify-between md:items-center mb-8">
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
                 <svg class="h-12 w-12 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#87CEEB"/>
+                    <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#22d3ee"/>
                     <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#111827"/>
                     <text x="50" y="62" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
                 </svg>
@@ -58,20 +58,18 @@
                  if (standings) {
                     standingsContainer.innerHTML = `
                         <h2 class="text-2xl font-bold text-white mb-4">Current Standings</h2>
-                        <div class="gotham-bg-highlight p-4 rounded-lg text-center space-y-2">
-                            <div>
+                        <div class="gotham-bg-highlight p-4 rounded-lg flex flex-col sm:flex-row items-center justify-around text-center space-y-4 sm:space-y-0">
+                            <div class="flex-1">
                                 <p class="text-sm text-gray-400">League Rank</p>
                                 <p class="gotham-accent font-extrabold text-4xl">${standings.rank}</p>
                             </div>
-                            <div class="flex justify-around text-center">
-                                <div>
-                                    <p class="text-sm text-gray-400">Points</p>
-                                    <p class="font-bold text-xl">${standings.points}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-400">Record (W-L-D)</p>
-                                    <p class="font-bold text-xl">${standings.record}</p>
-                                </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-400">Points</p>
+                                <p class="font-bold text-2xl">${standings.points}</p>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-400">Record (W-L-D)</p>
+                                <p class="font-bold text-2xl">${standings.record}</p>
                             </div>
                         </div>`;
                 } else {
@@ -85,13 +83,15 @@
                     { title: 'Goal Leaders', leaders: stats.goalLeaders, statName: 'Goals' },
                     { title: 'Assist Leaders', leaders: stats.assistLeaders, statName: 'Assists' },
                     { title: 'Shot Leaders', leaders: stats.shotLeaders, statName: 'Shots' },
-                    { title: 'Tackle Leaders', leaders: stats.tackleLeaders, statName: 'Tackles' },
+                    { title: 'Tackle Leaders (Won)', leaders: stats.tackleLeaders, statName: 'Tackles' },
                     { title: 'Interception Leaders', leaders: stats.interceptionLeaders, statName: 'INT' },
-                    { title: 'Headed Duel Leaders', leaders: stats.headedDuelLeaders, statName: 'Duels Won' },
+                    { title: 'Headed Duels Won', leaders: stats.headedDuelLeaders, statName: 'Duels' },
                 ];
 
+                let contentRendered = false;
                 statCategories.forEach(cat => {
                     if (cat.leaders && cat.leaders.length > 0) {
+                        contentRendered = true;
                         html += `<div><h3 class="text-lg font-semibold gotham-accent mb-2">${cat.title}</h3><ul class="space-y-1">`;
                         cat.leaders.forEach((player, index) => {
                             html += `<li class="flex justify-between items-center gotham-bg-highlight p-2 rounded-md text-sm">
@@ -102,6 +102,11 @@
                         html += `</ul></div>`;
                     }
                 });
+
+                if (!contentRendered) {
+                    playerLeadersContainer.innerHTML = '<h2 class="text-2xl font-bold text-white mb-4">Player Leaders</h2><p class="text-center text-gray-400">Player leader data is currently unavailable.</p>';
+                    return;
+                }
 
                 html += '</div>';
                 playerLeadersContainer.innerHTML = html;
@@ -160,3 +165,4 @@
     </script>
 </body>
 </html>
+
