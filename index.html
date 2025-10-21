@@ -40,15 +40,15 @@
                          <p class="text-center text-gray-400">Loading upcoming match...</p>
                     </div>
 
-                    <!-- Team Stat Leaders -->
+                    <!-- Team Stats -->
                     <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
-                        <h2 class="text-2xl font-bold text-white mb-4">Team Leaders</h2>
-                        <div id="stats-leaders-container" class="space-y-4 flex-grow">
-                            <p class="text-center text-gray-400">Loading team leaders...</p>
+                        <h2 class="text-2xl font-bold text-white mb-4">Team Stats</h2>
+                        <div id="team-stats-container" class="space-y-3 flex-grow">
+                            <p class="text-center text-gray-400">Loading team stats...</p>
                         </div>
                         <div class="mt-6 space-y-2">
                              <a href="./roster.html" class="gotham-button block w-full text-center py-3 px-4 rounded-lg font-bold">
-                                View Full Roster & Bios
+                                View Full Roster
                             </a>
                             <button id="see-more-stats-btn" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
                                 See More Stats
@@ -113,7 +113,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             // --- DOM Elements ---
             const upcomingMatchContainer = document.getElementById('upcoming-match-container');
-            const statsLeadersContainer = document.getElementById('stats-leaders-container');
+            const teamStatsContainer = document.getElementById('team-stats-container');
             const newsFeedContent = document.getElementById('news-feed-content');
             const socialFeedContent = document.getElementById('social-feed-content');
             const standingsContainer = document.getElementById('standings-container');
@@ -188,75 +188,64 @@
                     standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4">Current Standings</h2><p class="text-center text-gray-400">Standings unavailable.</p>`;
                 }
             }
+            
+            function renderTeamStats(stats) {
+                 const getStat = (id) => stats?.[id]?.value ?? 'N/A';
+                 const formatPercent = (id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : 'N/A';
 
-            function renderStatsLeaders(stats) {
-                if (stats && stats.goalLeaders && stats.assistLeaders && stats.goalLeaders.length > 0 && stats.assistLeaders.length > 0) {
-                     statsLeadersContainer.innerHTML = `
-                        <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div><p class="text-sm text-gray-400">Goal Leader</p><p class="font-bold text-lg text-white">${stats.goalLeaders[0].name}</p></div>
-                            <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeaders[0].total}</p>
-                        </div>
-                        <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div><p class="text-sm text-gray-400">Assist Leader</p><p class="font-bold text-lg text-white">${stats.assistLeaders[0].name}</p></div>
-                            <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeaders[0].total}</p>
-                        </div>`;
-                } else {
-                    statsLeadersContainer.innerHTML = `<p class="text-center text-gray-400">Team stats currently unavailable.</p>`;
-                }
+                 teamStatsContainer.innerHTML = `
+                    <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
+                        <div><p class="text-sm text-gray-400">Goals Scored</p><p class="font-bold text-lg text-white">${getStat('goals-scored')}</p></div>
+                        <div><p class="text-sm text-gray-400">Goals Conceded</p><p class="font-bold text-lg text-white">${getStat('goals-conceded')}</p></div>
+                    </div>
+                    <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
+                        <div><p class="text-sm text-gray-400">Passing Accuracy</p><p class="font-bold text-lg text-white">${formatPercent('Passing Accuracy')}</p></div>
+                         <div><p class="text-sm text-gray-400">Shooting Accuracy</p><p class="font-bold text-lg text-white">${formatPercent('Shooting Accuracy')}</p></div>
+                    </div>
+                 `;
             }
 
             function renderDetailedStatsModal(stats) {
+                const getStat = (id) => stats?.[id]?.value ?? 'N/A';
+                const formatPercent = (id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : 'N/A';
+
                 let html = '<div class="space-y-6">';
-                
-                // Helper to build a list for a stat category
-                const buildStatList = (title, leaders, statName) => {
-                    let sectionHtml = '';
-                    if (leaders && leaders.length > 0) {
-                        sectionHtml += `<div><h3 class="text-xl font-bold text-white mb-2">${title}</h3><ul class="space-y-1">`;
-                        leaders.forEach((player, index) => {
-                            sectionHtml += `<li class="flex justify-between items-center gotham-bg-highlight p-2 rounded-md text-sm">
-                                <span>${index + 1}. ${player.name}</span>
-                                <span class="font-bold gotham-accent">${player.total} ${statName}</span>
-                            </li>`;
-                        });
-                        sectionHtml += `</ul></div>`;
-                    }
-                    return sectionHtml;
-                };
 
-                // Helper to build a single team stat display
-                const buildTeamStat = (title, statObj, unit) => {
-                     if (statObj && typeof statObj.total !== 'undefined') {
-                        return `<div><h3 class="text-xl font-bold text-white mb-2">${title}</h3>
-                                    <div class="gotham-bg-highlight p-3 rounded-lg text-center">
-                                        <p class="gotham-accent font-extrabold text-3xl">${statObj.total.toFixed(1)}${unit}</p>
-                                    </div></div>`;
-                    }
-                    return '';
-                };
+                // Overall Stats
+                html += `<div><h3 class="text-xl font-bold text-white mb-2">Overall</h3><ul class="space-y-1 text-sm">
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Games Played</span><span class="font-bold gotham-accent">${getStat('played')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Goals</span><span class="font-bold gotham-accent">${getStat('goals-scored')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Assists</span><span class="font-bold gotham-accent">${getStat('Goal Assists')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Clean Sheets</span><span class="font-bold gotham-accent">${getStat('Clean Sheets')}</span></li>
+                </ul></div>`;
 
-                html += buildStatList('Shot Leaders', stats.shotLeaders, 'Shots');
-                html += buildStatList('Shots on Target Leaders', stats.sotLeaders, 'SOT');
-                html += buildStatList('Passing Leaders (Completed)', stats.passLeaders, 'Passes');
-                html += buildStatList('Tackle Leaders (Won)', stats.tackleLeaders, 'Tackles');
-                html += buildStatList('Interception Leaders', stats.interceptionLeaders, 'INT');
-                html += buildStatList('Corner Leaders', stats.cornerLeaders, 'Corners');
-                html += buildStatList('Headed Duel Leaders', stats.headedDuelLeaders, 'Duels Won');
-                
-                html += '<h3 class="text-xl font-bold text-white pt-4 border-t border-gotham-border">Team Stats</h3>';
-                html += buildTeamStat('Passing Accuracy', stats.passingAccuracy, '%');
-                html += buildTeamStat('Penalty Kick %', stats.penaltyKickPercentage, '%');
-                html += buildTeamStat('Goals Conceded', stats.goalsConceded, '');
+                // Attacking Stats
+                html += `<div><h3 class="text-xl font-bold text-white mb-2">Attacking</h3><ul class="space-y-1 text-sm">
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Total Shots</span><span class="font-bold gotham-accent">${getStat('Total Shots')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Shots on Target</span><span class="font-bold gotham-accent">${getStat('Shots On Target ( inc goals )')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Shooting Accuracy</span><span class="font-bold gotham-accent">${formatPercent('Shooting Accuracy')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Passing Accuracy</span><span class="font-bold gotham-accent">${formatPercent('Passing Accuracy')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Corners Taken</span><span class="font-bold gotham-accent">${getStat('Corners Taken (incl short corners)')}</span></li>
+                </ul></div>`;
 
+                // Defending Stats
+                 html += `<div><h3 class="text-xl font-bold text-white mb-2">Defending</h3><ul class="space-y-1 text-sm">
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Goals Conceded</span><span class="font-bold gotham-accent">${getStat('goals-conceded')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Tackles Won</span><span class="font-bold gotham-accent">${getStat('Tackles Won')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Tackle Success %</span><span class="font-bold gotham-accent">${formatPercent('Tackle Success')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Interceptions</span><span class="font-bold gotham-accent">${getStat('Interceptions')}</span></li>
+                    <li class="flex justify-between gotham-bg-highlight p-2 rounded-md"><span>Aerial Duels Won</span><span class="font-bold gotham-accent">${getStat('Aerial Duels won')}</span></li>
+                </ul></div>`;
 
                 if (html === '<div class="space-y-6">') {
-                    html += '<p class="text-gray-400 text-center">Detailed stats are currently unavailable.</p>';
+                    html = '<p class="text-gray-400 text-center">Detailed stats are currently unavailable.</p>';
+                } else {
+                    html += '</div>';
                 }
-
-                html += '</div>';
+                
                 modalStatsContent.innerHTML = html;
             }
-
+            
             function renderFeed(container, data, renderFunc) {
                  container.innerHTML = '';
                  if (data && data.length > 0) {
@@ -279,7 +268,19 @@
                 </div>`;
 
             const renderSocialItem = (post) => {
-                // ... same as before
+                if (post.type === 'instagram') {
+                    return `
+                        <div class="gotham-bg-highlight p-3 rounded-lg">
+                            <p class="font-bold">${post.user} <span class="text-gray-400 font-normal">(${post.handle}) &bull; ${post.time}</span></p>
+                            <img src="${post.image}" alt="Instagram post" class="rounded-md my-2 w-full h-auto object-cover">
+                            <p class="text-white mt-1">${post.content}</p>
+                        </div>`;
+                }
+                return `
+                     <div class="gotham-bg-highlight p-3 rounded-lg">
+                        <p class="font-bold">${post.user} <span class="text-gray-400 font-normal">${post.handle} &bull; ${post.time}</span></p>
+                        <p class="text-white mt-1">${post.content}</p>
+                     </div>`;
             };
 
             // --- Main Data Fetching ---
@@ -291,16 +292,16 @@
                     
                     renderUpcomingMatch(allData.schedule);
                     renderStandings(allData.standings);
-                    renderStatsLeaders(allData.stats);
+                    renderTeamStats(allData.stats);
                     renderDetailedStatsModal(allData.stats);
                     renderFeed(newsFeedContent, allData.news, renderNewsItem);
                     renderFeed(socialFeedContent, allData.social, renderSocialItem);
 
                 } catch (error) {
                     console.error('Error fetching site data:', error);
-                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data.</p>`;
+                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
                     upcomingMatchContainer.innerHTML = errorMessage;
-                    statsLeadersContainer.innerHTML = errorMessage;
+                    teamStatsContainer.innerHTML = errorMessage;
                     newsFeedContent.innerHTML = errorMessage;
                     socialFeedContent.innerHTML = errorMessage;
                     standingsContainer.innerHTML = errorMessage;
