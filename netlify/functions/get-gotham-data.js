@@ -89,7 +89,31 @@ exports.handler = async function(event, context) {
     // Fallback data is a safety net in case an API fails
     const fallbackData = {
         roster: [
-            { name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Veteran German international known for her shot-stopping." }
+            { name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany" },
+            { name: "Ryan Campbell", pos: "GK", num: 12, bio: "Goalkeeper from USA" },
+            { name: "Shelby Hogan", pos: "GK", num: 1, bio: "Goalkeeper from USA" },
+            { name: "Tierna Davidson", pos: "DF", num: 15, bio: "Defender from USA" },
+            { name: "Jess Carter", pos: "DF", num: 27, bio: "Defender from England" },
+            { name: "Emily Sonnett", pos: "DF", num: 6, bio: "Defender from USA" },
+            { name: "Bruninha", pos: "DF", num: 3, bio: "Defender from Brazil" },
+            { name: "Lilly Reale", pos: "DF", num: 4, bio: "Defender from USA" },
+            { name: "Mandy Freeman", pos: "DF", num: 22, bio: "Defender from USA" },
+            { name: "Kayla Duran", pos: "DF", num: 19, bio: "Defender from USA" },
+            { name: "Rose Lavelle", pos: "MF", num: 16, bio: "Midfielder from USA" },
+            { name: "Nealy Martin", pos: "MF", num: 14, bio: "Midfielder from USA" },
+            { name: "Sarah Schupansky", pos: "MF", num: 11, bio: "Midfielder from USA" },
+            { name: "Taryn Torres", pos: "MF", num: 8, bio: "Midfielder from USA" },
+            { name: "Jaedyn Shaw", pos: "MF", num: 2, bio: "Midfielder from USA" },
+            { name: "Sofia Cook", pos: "MF", num: 21, bio: "Midfielder from USA" },
+            { name: "Josefine Hasbo", pos: "MF", num: 5, bio: "Midfielder from Denmark" },
+            { name: "Esther González", pos: "FW", num: 9, bio: "Forward from Spain" },
+            { name: "Midge Purce", pos: "FW", num: 23, bio: "Forward from USA" },
+            { name: "Ella Stevens", pos: "FW", num: 13, bio: "Forward from USA" },
+            { name: "Gabi Portilho", pos: "FW", num: 18, bio: "Forward from Brazil" },
+            { name: "Geyse Ferreira", pos: "FW", num: 10, bio: "Forward from Brazil" },
+            { name: "Khyah Harper", pos: "FW", num: 34, bio: "Forward from USA" },
+            { name: "Katie Stengel", pos: "FW", num: 28, bio: "Forward from USA" },
+            { name: "McKenna Whitham", pos: "FW", num: 17, bio: "Forward from USA" }
         ],
         schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
         stats: { goalLeader: { name: 'Esther González', total: 9 }, assistLeader: { name: 'Rose Lavelle', total: 6 } },
