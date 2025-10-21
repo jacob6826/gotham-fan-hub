@@ -290,7 +290,12 @@
 
                 } catch (error) {
                     console.error('Error fetching site data:', error);
-                    upcomingMatchContainer.innerHTML = `<p class="text-red-400 text-center">Could not load site data.</p>`;
+                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
+                    upcomingMatchContainer.innerHTML = errorMessage;
+                    statsLeadersContainer.innerHTML = errorMessage;
+                    newsFeedContent.innerHTML = errorMessage;
+                    socialFeedContent.innerHTML = errorMessage;
+                    modalStatsContent.innerHTML = errorMessage;
                 }
             }
 
