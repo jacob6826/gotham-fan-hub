@@ -21,8 +21,21 @@ const processNWSLRosterData = (apiData, enrichmentData) => {
         try {
             if (!player || !player.mediaFirstName || !player.mediaLastName) return null;
             
-            const lastName = player.mediaLastName;
-            const enriched = enrichmentData[normalizeName(lastName)] || {};
+            // Create a list of potential names to check against the Google Sheet
+            const potentialKeys = [
+                normalizeName(player.shirtName),      // e.g., "bruninha"
+                normalizeName(player.shortName),      // e.g., "gabi portilho"
+                normalizeName(player.mediaLastName)   // e.g., "santos nhaia"
+            ].filter(key => key); // Filter out any empty/null names
+
+            let enriched = {};
+            // Find the first name that exists as a key in our enrichment data
+            for (const key of potentialKeys) {
+                if (enrichmentData[key]) {
+                    enriched = enrichmentData[key];
+                    break; // Stop searching once a match is found
+                }
+            }
 
             const position = player.roleLabel.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder');
             const posMap = { 'Goalkeeper': 'GK', 'Defender': 'DF', 'Midfielder': 'MF', 'Forward': 'FW' };
