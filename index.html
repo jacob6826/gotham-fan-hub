@@ -41,14 +41,19 @@
                     </div>
 
                     <!-- Team Stat Leaders -->
-                    <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                    <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
                         <h2 class="text-2xl font-bold text-white mb-4">Team Leaders</h2>
-                        <div id="stats-leaders-container" class="space-y-4">
+                        <div id="stats-leaders-container" class="space-y-4 flex-grow">
                             <p class="text-center text-gray-400">Loading team leaders...</p>
                         </div>
-                        <a href="./roster.html" class="gotham-button block w-full text-center mt-6 py-3 px-4 rounded-lg font-bold">
-                            View Full Roster & Bios
-                        </a>
+                        <div class="mt-6 space-y-2">
+                             <a href="./roster.html" class="gotham-button block w-full text-center py-3 px-4 rounded-lg font-bold">
+                                View Full Roster & Bios
+                            </a>
+                            <button id="see-more-stats-btn" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
+                                See More Stats
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -86,6 +91,19 @@
         </div>
     </div>
 
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div class="gotham-bg rounded-xl shadow-lg border border-gotham-border w-full max-w-3xl max-h-[90vh] flex flex-col">
+            <header class="p-4 flex justify-between items-center border-b border-gotham-border">
+                <h2 class="text-2xl font-bold text-white">Detailed Team Stats</h2>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </header>
+            <div id="modal-stats-content" class="p-6 overflow-y-auto">
+                <p class="text-center text-gray-400">Loading detailed stats...</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // --- DOM Elements ---
@@ -93,12 +111,23 @@
             const statsLeadersContainer = document.getElementById('stats-leaders-container');
             const newsFeedContent = document.getElementById('news-feed-content');
             const socialFeedContent = document.getElementById('social-feed-content');
+            const statsModal = document.getElementById('stats-modal');
+            const seeMoreStatsBtn = document.getElementById('see-more-stats-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalStatsContent = document.getElementById('modal-stats-content');
+
+            // --- Modal Logic ---
+            seeMoreStatsBtn.addEventListener('click', () => statsModal.classList.remove('hidden'));
+            closeModalBtn.addEventListener('click', () => statsModal.classList.add('hidden'));
+            statsModal.addEventListener('click', (e) => {
+                if (e.target === statsModal) {
+                    statsModal.classList.add('hidden');
+                }
+            });
 
             // --- Data and State ---
-            let allNews = [];
-            let allSocial = [];
-            let newsCursor = 0;
-            let socialCursor = 0;
+            let allNews = [], allSocial = [], allStats = {};
+            let newsCursor = 0, socialCursor = 0;
             const itemsPerLoad = 5;
 
             // --- Render Functions ---
@@ -132,19 +161,50 @@
             }
 
             function renderStatsLeaders(stats) {
-                if (stats && stats.goalLeader && stats.assistLeader) {
+                if (stats && stats.goalLeaders && stats.assistLeaders && stats.goalLeaders.length > 0 && stats.assistLeaders.length > 0) {
                      statsLeadersContainer.innerHTML = `
                         <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div><p class="text-sm text-gray-400">Goal Leader</p><p class="font-bold text-lg text-white">${stats.goalLeader.name}</p></div>
-                            <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeader.total}</p>
+                            <div><p class="text-sm text-gray-400">Goal Leader</p><p class="font-bold text-lg text-white">${stats.goalLeaders[0].name}</p></div>
+                            <p class="gotham-accent font-extrabold text-3xl">${stats.goalLeaders[0].total}</p>
                         </div>
                         <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                            <div><p class="text-sm text-gray-400">Assist Leader</p><p class="font-bold text-lg text-white">${stats.assistLeader.name}</p></div>
-                            <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeader.total}</p>
+                            <div><p class="text-sm text-gray-400">Assist Leader</p><p class="font-bold text-lg text-white">${stats.assistLeaders[0].name}</p></div>
+                            <p class="gotham-accent font-extrabold text-3xl">${stats.assistLeaders[0].total}</p>
                         </div>`;
                 } else {
                     statsLeadersContainer.innerHTML = `<p class="text-center text-gray-400">Team stats currently unavailable.</p>`;
                 }
+            }
+
+            function renderDetailedStatsModal(stats) {
+                let html = '<div class="space-y-6">';
+                const statCategories = [
+                    { title: 'Shooting Leaders', leaders: stats.shotLeaders, statName: 'Shots' },
+                    { title: 'Shots on Target Leaders', leaders: stats.sotLeaders, statName: 'SOT' },
+                    { title: 'Passing Leaders (Completed)', leaders: stats.passLeaders, statName: 'Passes' },
+                    { title: 'Tackle Leaders (Won)', leaders: stats.tackleLeaders, statName: 'Tackles' },
+                    { title: 'Interception Leaders', leaders: stats.interceptionLeaders, statName: 'INT' },
+                ];
+
+                statCategories.forEach(cat => {
+                    if (cat.leaders && cat.leaders.length > 0) {
+                        html += `<div><h3 class="text-xl font-bold text-white mb-2">${cat.title}</h3><ul class="space-y-1">`;
+                        cat.leaders.forEach((player, index) => {
+                            html += `<li class="flex justify-between items-center gotham-bg-highlight p-2 rounded-md text-sm">
+                                <span>${index + 1}. ${player.name}</span>
+                                <span class="font-bold gotham-accent">${player.total} ${cat.statName}</span>
+                            </li>`;
+                        });
+                        html += `</ul></div>`;
+                    }
+                });
+
+                if (html === '<div class="space-y-6">') {
+                    html += '<p class="text-gray-400 text-center">Detailed stats are currently unavailable.</p>';
+                }
+
+                html += '</div>';
+                modalStatsContent.innerHTML = html;
             }
 
             function appendItems(container, items, renderFunc) {
@@ -214,8 +274,10 @@
                     if (!response.ok) throw new Error(`API call failed: ${response.status}`);
                     const data = await response.json();
                     
+                    allStats = data.stats || {};
                     renderUpcomingMatch(data.schedule);
-                    renderStatsLeaders(data.stats);
+                    renderStatsLeaders(allStats);
+                    renderDetailedStatsModal(allStats);
 
                     allNews = data.news || [];
                     allSocial = data.social || [];
