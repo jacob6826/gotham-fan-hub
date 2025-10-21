@@ -21,9 +21,8 @@ const processNWSLRosterData = (apiData, enrichmentData) => {
         try {
             if (!player || !player.mediaFirstName || !player.mediaLastName) return null;
             
-            // Use a normalized last name for a more robust lookup
-            const normalizedLastName = normalizeName(player.mediaLastName);
-            const enriched = enrichmentData[normalizedLastName] || {};
+            const lastName = player.mediaLastName;
+            const enriched = enrichmentData[normalizeName(lastName)] || {};
 
             const position = player.roleLabel.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder');
             const posMap = { 'Goalkeeper': 'GK', 'Defender': 'DF', 'Midfielder': 'MF', 'Forward': 'FW' };
@@ -33,8 +32,8 @@ const processNWSLRosterData = (apiData, enrichmentData) => {
                 pos: posMap[position] || 'N/A',
                 num: player.bibNumber || 'N/A',
                 bio: `${position} from ${player.nationality || 'N/A'}`,
-                headshot: enriched.headshotUrl || null, // Add headshot URL from sheet
-                pageUrl: enriched.playerPageUrl || null  // Add player page URL from sheet
+                headshot: enriched.headshotUrl || null,
+                pageUrl: enriched.playerPageUrl || null
             };
         } catch (error) { 
             console.error("Error processing a single player entry:", player, error);
@@ -60,7 +59,56 @@ const processScheduleData = (apiData) => {
     });
 };
 
-// Helper function to parse CSV data from your Google Sheet
+// Helper function to process the NWSL GENERAL stats API data
+const processStatsData = (apiData) => {
+    if (!apiData || !apiData.team || !apiData.team.stats) { return null; }
+    const statsArray = apiData.team.stats;
+    const statsObj = {};
+    statsArray.forEach(stat => {
+        statsObj[stat.statsId] = { label: stat.statsLabel, value: stat.statsValue };
+    });
+    return statsObj;
+};
+
+// UPDATED: More robust helper function for standings
+const processStandingsData = (apiData) => {
+    try {
+        if (!apiData?.standings?.[0]?.teams) {
+            console.error("Standings data is missing expected structure.");
+            return null;
+        }
+        // Use the unique team ID for a more reliable match
+        const gothamData = apiData.standings[0].teams.find(team => team.teamId === 'nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39');
+        if (!gothamData || !gothamData.stats) {
+            console.error("Could not find 'Gotham FC' in the standings data.");
+            return null;
+        }
+        const getStat = (id) => gothamData.stats.find(s => s.statsId === id)?.statsValue;
+        
+        const rank = getStat('rank');
+        const points = getStat('points');
+        const wins = getStat('win');
+        const losses = getStat('lose');
+        const draws = getStat('draw');
+
+        if ([rank, points, wins, losses, draws].some(s => s === undefined)) {
+            console.error("One or more required stats (rank, points, W, L, D) are missing for Gotham FC.");
+            return null;
+        }
+
+        return {
+            rank,
+            points,
+            record: `${wins}-${losses}-${draws}`
+        };
+    } catch (error) {
+        console.error("An error occurred while processing standings data:", error);
+        return null;
+    }
+};
+
+
+// Helper to parse CSV data from your Google Sheet
 const parseCsv = (csvString) => {
     return new Promise((resolve, reject) => {
         const results = {};
@@ -70,7 +118,6 @@ const parseCsv = (csvString) => {
             .pipe(csv({ headers: ['lastName', 'headshotUrl', 'playerPageUrl'] }))
             .on('data', (data) => {
                 if (data.lastName) {
-                    // Store the data using a normalized last name as the key
                     results[normalizeName(data.lastName)] = data;
                 }
             })
@@ -84,15 +131,18 @@ const parseCsv = (csvString) => {
 };
 
 exports.handler = async function(event, context) {
-    // --- API & DATA URLS ---
+    const CURRENT_SEASON_ID = "nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c";
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTpJmieTcb-C1k_4NDTLR_XfVUBzSc_GBrWVPAx4bt994junG5YY_S3EtZnS_0j42RwwYSYa4eGBpAq/pub?output=csv';
-    const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c';
-    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
-    
-    // Fallback data is a safety net in case an API fails
+    const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${CURRENT_SEASON_ID}`;
+    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
+    const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
+    const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
+
     const fallbackData = {
         roster: [{ name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany", headshot: null, pageUrl: null }],
         schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
+        stats: { "goals-scored": { label: "Goals scored", value: 'N/A' } },
+        standings: { rank: 'N/A', points: 'N/A', record: 'N/A' },
     };
     
     async function fetchAndProcess(url, processor, fallback, ...args) {
@@ -100,7 +150,11 @@ exports.handler = async function(event, context) {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`API call failed: ${response.status}`);
             const data = await response.json();
-            return processor(data, ...args);
+            const processedData = processor(data, ...args);
+            if (!processedData || (Array.isArray(processedData) && processedData.length === 0 && Object.keys(processedData).length === 0)) {
+                throw new Error("Processing resulted in empty data.");
+            }
+            return processedData;
         } catch (error) {
             console.error(`Failed to fetch live data from ${url}, using fallback.`, error);
             return fallback;
@@ -115,21 +169,23 @@ exports.handler = async function(event, context) {
             return await parseCsv(csvText);
         } catch (error) {
             console.error('Failed to fetch or parse Google Sheet CSV', error);
-            return {}; // Return empty object on failure
+            return {};
         }
     }
 
     const enrichmentData = await fetchCsvData(GOOGLE_SHEET_CSV_URL);
 
-    const [schedule] = await Promise.all([
+    const [schedule, stats, standings] = await Promise.all([
         fetchAndProcess(NWSL_SCHEDULE_API_URL, processScheduleData, fallbackData.schedule),
+        fetchAndProcess(NWSL_STATS_API_URL, processStatsData, fallbackData.stats),
+        fetchAndProcess(NWSL_STANDINGS_API_URL, processStandingsData, fallbackData.standings)
     ]);
     
     const roster = await fetchAndProcess(NWSL_ROSTER_API_URL, processNWSLRosterData, fallbackData.roster, enrichmentData);
     
     return {
         statusCode: 200,
-        body: JSON.stringify({ roster, schedule })
+        body: JSON.stringify({ roster, schedule, stats, standings })
     };
 };
 
