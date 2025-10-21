@@ -59,7 +59,33 @@ exports.handler = async function(event, context) {
     
     // Fallback data is a safety net in case an API fails
     const fallbackData = {
-        roster: [{ name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Veteran German international." }],
+        roster: [
+            { name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Veteran German international known for her shot-stopping." },
+            { name: "Ryan Campbell", pos: "GK", num: 12, bio: "Agile young keeper drafted out of UCLA, known for quick reflexes." },
+            { name: "Shelby Hogan", pos: "GK", num: 1, bio: "Provides reliable depth and experience in the goalkeeping corps." },
+            { name: "Tierna Davidson", pos: "DF", num: 15, bio: "USWNT center-back and team captain, a leader in organizing the back line." },
+            { name: "Jess Carter", pos: "DF", num: 27, bio: "Versatile English international who can play across the entire defensive line." },
+            { name: "Emily Sonnett", pos: "DF", num: 6, bio: "Tough-tackling USWNT veteran, brings tenacity to the defense." },
+            { name: "Bruninha", pos: "DF", num: 3, bio: "Dynamic Brazilian fullback known for her speed and attacking runs." },
+            { name: "Lilly Reale", pos: "DF", num: 4, bio: "Promising rookie center-back from UCLA with poise beyond her years." },
+            { name: "Mandy Freeman", pos: "DF", num: 22, bio: "A reliable and experienced defender, part of the club for many years." },
+            { name: "Kayla Duran", pos: "DF", num: 19, bio: "Strong defensive presence, adding depth to the back line." },
+            { name: "Rose Lavelle", pos: "MF", num: 16, bio: "World-class creative midfielder known for her dribbling and vision." },
+            { name: "Nealy Martin", pos: "MF", num: 14, bio: "A hard-working and versatile player, able to fill in defense or midfield." },
+            { name: "Sarah Schupansky", pos: "MF", num: 11, bio: "Skilled rookie midfielder with a keen eye for a final pass." },
+            { name: "Taryn Torres", pos: "MF", num: 8, bio: "A technical midfielder with good passing range and field awareness." },
+            { name: "Jaedyn Shaw", pos: "MF", num: 2, bio: "Exciting young USWNT talent with game-changing attacking ability." },
+            { name: "Sofia Cook", pos: "MF", num: 21, bio: "A promising young midfielder with great potential." },
+            { name: "Josefine Hasbo", pos: "MF", num: 5, bio: "Danish international who brings technical skill to the midfield." },
+            { name: "Esther González", pos: "FW", num: 9, bio: "Clinical Spanish international striker and a proven goalscorer." },
+            { name: "Midge Purce", pos: "FW", num: 23, bio: "Explosive USWNT forward known for her incredible speed and dribbling." },
+            { name: "Ella Stevens", pos: "FW", num: 13, bio: "A strong and versatile forward who can play centrally or out wide." },
+            { name: "Gabi Portilho", pos: "FW", num: 18, bio: "Pacy Brazilian winger who brings flair and creativity to the attack." },
+            { name: "Geyse Ferreira", pos: "FW", num: 10, bio: "Dynamic Brazilian forward with a powerful shot and finishing ability." },
+            { name: "Khyah Harper", pos: "FW", num: 34, bio: "A young forward with a bright future and an eye for goal." },
+            { name: "Katie Stengel", pos: "FW", num: 28, bio: "Veteran NWSL forward who provides a strong presence in the box." },
+            { name: "McKenna Whitham", pos: "FW", num: 17, bio: "The youngest player on the roster, a prodigious attacking talent." }
+        ],
         schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
         stats: { goalLeader: { name: 'Esther González', total: 9 }, assistLeader: { name: 'Rose Lavelle', total: 6 } },
         news: [{ source: 'OneFootball', date: 'Oct 21, 2025', title: 'Gotham FC\'s International Stars Shine', snippet: 'A look at how Gotham\'s players performed...', url: 'https://onefootball.com/en/home' }],
@@ -91,8 +117,8 @@ exports.handler = async function(event, context) {
     const responseData = {
         roster,
         schedule,
-        stats: statsData, // Use the fetched stats data
-        news: fallbackData.news, // News and social will use fallbacks for now
+        stats: statsData,
+        news: fallbackData.news,
         social: fallbackData.social
     };
 
@@ -101,4 +127,3 @@ exports.handler = async function(event, context) {
         body: JSON.stringify(responseData)
     };
 };
-
