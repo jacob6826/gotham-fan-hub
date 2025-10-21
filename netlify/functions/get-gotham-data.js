@@ -1,151 +1,113 @@
 // This is a serverless function that will run on Netlify's servers.
-// Its job is to securely fetch data from external APIs and fall back to stored data if needed.
+// Its job is to securely fetch data from an external API.
 
-// Helper function to process the official NWSL roster API data
+// Roster processor for the official NWSL API data
 const processNWSLRosterData = (apiData) => {
-    if (!apiData || !apiData.data || !apiData.data.persons) {
-        return [];
-    }
-    const players = apiData.data.persons;
-    return players.map(player => {
-        const position = player.positions && player.positions[0] ? player.positions[0].name.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder') : 'N/A';
-        const posMap = { 'Goalkeeper': 'GK', 'Defender': 'DF', 'Midfielder': 'MF', 'Forward': 'FW' };
+    if (!apiData || !apiData.data || !apiData.data.squad) return [];
+    
+    return apiData.data.squad.map(player => {
+        const jerseyStat = player.stats.find(stat => stat.name === 'number');
         return {
-            name: `${player.firstName} ${player.lastName}`,
-            pos: posMap[position] || 'N/A',
-            num: player.jerseyNumber || 'N/A',
-            bio: `${position} from ${player.birthplace || 'N/A'}`
+            name: player.participant.name,
+            pos: player.position.name.substring(0, 2).toUpperCase().replace('AL','GK'), // GOALKEEPER -> GK
+            num: jerseyStat ? jerseyStat.value : 'N/A',
+            bio: `${player.position.name} from ${player.participant.country.name}`
         };
     });
 };
 
-// Helper function to process the official NWSL schedule API data
+// Schedule processor for the official NWSL API data
 const processScheduleData = (apiData) => {
-    if (!apiData || !apiData.data || !apiData.data.matches) { return []; }
+    if (!apiData || !apiData.data || !apiData.data.matches) return [];
     const gothamMatches = apiData.data.matches.filter(match => 
         match.homeTeam.name === "NJ/NY Gotham FC" || match.awayTeam.name === "NJ/NY Gotham FC"
     );
     return gothamMatches.map(match => {
         const isHomeGame = match.homeTeam.name === "NJ/NY Gotham FC";
-        return {
-            opponent: isHomeGame ? match.awayTeam.name : match.homeTeam.name,
-            date: match.matchDate,
-            location: match.venue.name,
-            broadcast: match.broadcasts && match.broadcasts.length > 0 ? match.broadcasts.map(b => b.network.name).join(', ') : "TBD",
-            home: isHomeGame
-        };
+        const opponent = isHomeGame ? match.awayTeam.name : match.homeTeam.name;
+        const broadcastInfo = match.broadcasts?.map(b => b.network.name).join(', ') || "TBD";
+        return { opponent, date: match.matchDate, location: match.venue.name, broadcast: broadcastInfo, home: isHomeGame };
     });
 };
 
-// Helper function to process MULTIPLE stats categories from the NWSL API
-const processStatsData = (statsResponses) => {
-    const processedStats = {};
+// Stats processor for the official NWSL API data
+const processStatsData = (apiData) => {
+    if (!apiData || !apiData.data || !apiData.data.stats) return { goalLeader: null, assistLeader: null };
+    
+    const stats = apiData.data.stats;
+    const goalStat = stats.find(s => s.name === 'goals');
+    const assistStat = stats.find(s => s.name === 'total_assists');
 
-    // Helper to find and format a specific stat
-    const getStatLeaders = (data, statName, count = 3) => {
-        if (!data || !data.data || !data.data.stats) return [];
-        const stat = data.data.stats.find(s => s.name === statName);
-        if (!stat || !stat.persons || stat.persons.length === 0) return [];
-        return stat.persons.slice(0, count).map(p => ({
-            name: `${p.firstName} ${p.lastName}`,
-            total: p.value
-        }));
-    };
+    const goalLeader = goalStat?.leaders?.[0] ? { name: goalStat.leaders[0].participant.name, total: goalStat.leaders[0].value } : { name: "N/A", total: 0 };
+    const assistLeader = assistStat?.leaders?.[0] ? { name: assistStat.leaders[0].participant.name, total: assistStat.leaders[0].value } : { name: "N/A", total: 0 };
 
-    // Process each category
-    const standardData = statsResponses.find(r => r.category === 'standard')?.data;
-    const shootingData = statsResponses.find(r => r.category === 'shooting')?.data;
-    const passingData = statsResponses.find(r => r.category === 'passing')?.data;
-    const defendingData = statsResponses.find(r => r.category === 'defending')?.data;
-
-    if (standardData) {
-        processedStats.goalLeaders = getStatLeaders(standardData, 'goals');
-        processedStats.assistLeaders = getStatLeaders(standardData, 'assists');
-    }
-    if (shootingData) {
-        processedStats.shotLeaders = getStatLeaders(shootingData, 'shots');
-        processedStats.sotLeaders = getStatLeaders(shootingData, 'shotsOnTarget');
-    }
-    if (passingData) {
-        processedStats.passLeaders = getStatLeaders(passingData, 'successfulPasses');
-    }
-    if (defendingData) {
-        processedStats.tackleLeaders = getStatLeaders(defendingData, 'tacklesWon');
-        processedStats.interceptionLeaders = getStatLeaders(defendingData, 'interceptions');
-    }
-
-    return processedStats;
+    return { goalLeader, assistLeader };
 };
 
-
 exports.handler = async function(event, context) {
-    // --- DYNAMIC DATE CALCULATION ---
-    const today = new Date();
-    const futureDate = new Date();
-    futureDate.setMonth(today.getMonth() + 6); // Look 6 months into the future
-    
-    // Format dates to YYYY-MM-DD for the API
-    const formatDate = (date) => date.toISOString().split('T')[0];
-    const startDate = formatDate(today);
-    const endDate = formatDate(futureDate);
-
-    // --- API URLS ---
     const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/profile?locale=en-US';
-    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=${startDate}&endDate=${endDate}`;
-    const NWSL_STATS_BASE_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=';
-    
+    const NWSL_SCHEDULE_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28';
+    const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=attacking';
+
     const fallbackData = {
-        roster: [/* Full roster data */],
-        schedule: [/* Schedule data */],
-        stats: { goalLeaders: [{name: 'Esther González', total: 9}], assistLeaders: [{name: 'Rose Lavelle', total: 6}] },
-        news: [/* News data */],
-        social: [/* Social data */]
+        roster: [ { name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Veteran German international." }, { name: "Midge Purce", pos: "FW", num: 23, bio: "Explosive USWNT forward." } ],
+        schedule: [ { opponent: "NC Courage", date: "2025-10-26T17:00:00Z", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false } ],
+        stats: { goalLeader: { name: "Esther González", total: 9 }, assistLeader: { name: "Rose Lavelle", total: 6 } },
+        news: [ { source: 'NWSLsoccer.com', date: 'Oct 21, 2025', title: 'Playoff Picture: What\'s at Stake on Decision Day', snippet: 'A complete breakdown of the scenarios facing Gotham FC...', url: 'https://www.nwslsoccer.com/' } ],
+        social: [ { user: "Gotham FC", handle: "@GothamFC", time: "2h", type: "twitter", content: "One last push. Everything on the line this weekend. 🦇 #NWSL #GothamFC" } ]
     };
-    
-    async function fetchData(url, processor, fallback) {
+
+    async function fetchLiveRoster() {
         try {
-            const response = await fetch(url);
+            const response = await fetch(NWSL_ROSTER_API_URL);
             if (!response.ok) throw new Error(`API call failed: ${response.status}`);
             const data = await response.json();
-            const processedData = processor(data);
-            if (!processedData || (Array.isArray(processedData) && processedData.length === 0)) throw new Error("Processing resulted in empty data.");
-            return processedData;
+            const liveRoster = processNWSLRosterData(data);
+            if (liveRoster.length === 0) throw new Error("Processing live roster resulted in an empty array.");
+            return liveRoster;
         } catch (error) {
-            console.error(`Failed to fetch live data from ${url}, using fallback.`, error);
-            return fallback;
+            console.error('Failed to fetch live roster, using fallback.', error);
+            return fallbackData.roster;
+        }
+    }
+
+    async function fetchLiveSchedule() {
+        try {
+            const response = await fetch(NWSL_SCHEDULE_API_URL);
+            if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+            const data = await response.json();
+            const liveSchedule = processScheduleData(data);
+            if (liveSchedule.length === 0) throw new Error("Processing live schedule resulted in an empty array.");
+            return liveSchedule;
+        } catch (error) {
+            console.error('Failed to fetch live schedule, using fallback.', error);
+            return fallbackData.schedule;
         }
     }
     
-    async function fetchAllStats() {
-        const categories = ['standard', 'shooting', 'passing', 'defending'];
+    async function fetchLiveStats() {
         try {
-            const statPromises = categories.map(category => 
-                fetch(NWSL_STATS_BASE_URL + category).then(res => res.json()).then(data => ({category, data}))
-            );
-            const statsResponses = await Promise.all(statPromises);
-            return processStatsData(statsResponses);
-        } catch (error) {
-            console.error('Failed to fetch some or all stats categories, using fallback.', error);
+            const response = await fetch(NWSL_STATS_API_URL);
+            if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+            const data = await response.json();
+            return processStatsData(data);
+        } catch(error) {
+            console.error('Failed to fetch live stats, using fallback.', error);
             return fallbackData.stats;
         }
     }
 
     const [roster, schedule, stats] = await Promise.all([
-        fetchData(NWSL_ROSTER_API_URL, processNWSLRosterData, fallbackData.roster),
-        fetchData(NWSL_SCHEDULE_API_URL, processScheduleData, fallbackData.schedule),
-        fetchAllStats()
+        fetchLiveRoster(),
+        fetchLiveSchedule(),
+        fetchLiveStats()
     ]);
     
-    const responseData = {
-        roster,
-        schedule,
-        stats,
-        news: fallbackData.news, // News and social will use fallbacks for now
-        social: fallbackData.social
-    };
+    const responseData = { roster, schedule, stats, news: fallbackData.news, social: fallbackData.social };
 
     return {
         statusCode: 200,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(responseData)
     };
 };
