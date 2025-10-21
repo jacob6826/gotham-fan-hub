@@ -2,7 +2,7 @@
 // Its job is to securely fetch data from external APIs and fall back to stored data if needed.
 const google = require('google-it');
 
-// Helper function to process the official NWSL roster API data
+// Helper function to process the official NWSL roster API data from the /roster endpoint
 const processNWSLRosterData = (apiData) => {
     // The /roster endpoint has data under `data.roster`
     if (!apiData || !apiData.data || !apiData.data.roster) {
@@ -42,83 +42,18 @@ const processScheduleData = (apiData) => {
     });
 };
 
-// Helper function to process MULTIPLE stats categories from the NWSL API
-const processStatsData = (statsResponses) => {
-    const processedStats = {};
-
-    // Helper to find and format a specific stat leader list
-    const getStatLeaders = (data, statName, count = 3) => {
-        if (!data || !data.data || !data.data.stats) return [];
-        const stat = data.data.stats.find(s => s.name === statName);
-        if (!stat || !stat.persons || stat.persons.length === 0) return [];
-        return stat.persons.slice(0, count).map(p => ({
-            name: `${p.firstName} ${p.lastName}`,
-            total: p.value
-        }));
-    };
-    
-    // Helper to get a single stat object for team-level data
-    const getStat = (data, statName) => {
-        if (!data || !data.data || !data.data.stats) return null;
-        return data.data.stats.find(s => s.name === statName);
-    };
-
-    // Process each category
-    const standardData = statsResponses.find(r => r.category === 'standard')?.data;
-    const shootingData = statsResponses.find(r => r.category === 'shooting')?.data;
-    const passingData = statsResponses.find(r => r.category === 'passing')?.data;
-    const defendingData = statsResponses.find(r => r.category === 'defending')?.data;
-    const goalkeepingData = statsResponses.find(r => r.category === 'goalkeeping')?.data;
-
-    if (standardData) {
-        processedStats.goalLeaders = getStatLeaders(standardData, 'goals');
-        processedStats.assistLeaders = getStatLeaders(standardData, 'assists');
-        processedStats.cornerLeaders = getStatLeaders(standardData, 'corners');
-    }
-    if (shootingData) {
-        processedStats.shotLeaders = getStatLeaders(shootingData, 'shots');
-        processedStats.sotLeaders = getStatLeaders(shootingData, 'shotsOnTarget');
-        const pkAttemptsStat = getStat(shootingData, 'penaltyKickAttempts');
-        const pkGoalsStat = getStat(shootingData, 'penaltyKickGoals');
-        if (pkAttemptsStat && pkGoalsStat && pkAttemptsStat.team.value > 0) {
-            processedStats.penaltyKickPercentage = { total: (pkGoalsStat.team.value / pkAttemptsStat.team.value) * 100 };
-        }
-    }
-    if (passingData) {
-        processedStats.passLeaders = getStatLeaders(passingData, 'successfulPasses');
-        const successfulPassesStat = getStat(passingData, 'successfulPasses');
-        const passesAttemptedStat = getStat(passingData, 'passesAttempted');
-        if (successfulPassesStat && passesAttemptedStat && passesAttemptedStat.team.value > 0) {
-            processedStats.passingAccuracy = { total: (successfulPassesStat.team.value / passesAttemptedStat.team.value) * 100 };
-        }
-    }
-    if (defendingData) {
-        processedStats.tackleLeaders = getStatLeaders(defendingData, 'tacklesWon');
-        processedStats.interceptionLeaders = getStatLeaders(defendingData, 'interceptions');
-        processedStats.headedDuelLeaders = getStatLeaders(defendingData, 'headedDuelsWon');
-    }
-    if (goalkeepingData) {
-        const goalsConcededStat = getStat(goalkeepingData, 'goalsConceded');
-        if (goalsConcededStat) {
-            processedStats.goalsConceded = { total: goalsConcededStat.team.value };
-        }
-    }
-
-    return processedStats;
-};
-
-// Helper function to process the NWSL standings API data
-const processStandingsData = (apiData) => {
-    if (!apiData || !apiData.data || !apiData.data.standings) { return null; }
-    const gothamStanding = apiData.data.standings.find(team => team.team.name === 'NJ/NY Gotham FC');
-    if (!gothamStanding) { return null; }
+// Helper function to process the NWSL stats API data
+const processStatsData = (apiData) => {
+    if (!apiData || !apiData.data || !apiData.data.stats) { return null; }
+    const stats = apiData.data.stats;
+    const goalStat = stats.find(s => s.name === 'goals');
+    const assistStat = stats.find(s => s.name === 'assists');
+    if (!goalStat || !assistStat || goalStat.persons.length === 0 || assistStat.persons.length === 0) { return null; }
     return {
-        rank: gothamStanding.rank,
-        points: gothamStanding.points,
-        record: `${gothamStanding.wins}-${gothamStanding.losses}-${gothamStanding.draws}` // W-L-D
+        goalLeader: { name: `${goalStat.persons[0].firstName} ${goalStat.persons[0].lastName}`, total: goalStat.persons[0].value },
+        assistLeader: { name: `${assistStat.persons[0].firstName} ${assistStat.persons[0].lastName}`, total: assistStat.persons[0].value }
     };
 };
-
 
 // Helper function to process news search results from google-it
 const processNewsData = (searchData) => {
@@ -148,19 +83,48 @@ const processNewsData = (searchData) => {
 
 exports.handler = async function(event, context) {
     // --- API URLS ---
+    // Using the /roster endpoint as requested
     const NWSL_ROSTER_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c';
     const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
-    const NWSL_STATS_BASE_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=';
-    const NWSL_STANDINGS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/standings/overall?locale=en-US&orderBy=rank&direction=asc';
+    const NWSL_STATS_API_URL = 'https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=standard';
     
     // Fallback data is a safety net in case an API fails
     const fallbackData = {
-        roster: [ /* Full roster data */ ],
+        roster: [
+            { name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany" },
+            { name: "Ryan Campbell", pos: "GK", num: 12, bio: "Goalkeeper from USA" },
+            { name: "Shelby Hogan", pos: "GK", num: 1, bio: "Goalkeeper from USA" },
+            { name: "Tierna Davidson", pos: "DF", num: 15, bio: "Defender from USA" },
+            { name: "Jess Carter", pos: "DF", num: 27, bio: "Defender from England" },
+            { name: "Emily Sonnett", pos: "DF", num: 6, bio: "Defender from USA" },
+            { name: "Bruninha", pos: "DF", num: 3, bio: "Defender from Brazil" },
+            { name: "Lilly Reale", pos: "DF", num: 4, bio: "Defender from USA" },
+            { name: "Mandy Freeman", pos: "DF", num: 22, bio: "Defender from USA" },
+            { name: "Kayla Duran", pos: "DF", num: 19, bio: "Defender from USA" },
+            { name: "Rose Lavelle", pos: "MF", num: 16, bio: "Midfielder from USA" },
+            { name: "Nealy Martin", pos: "MF", num: 14, bio: "Midfielder from USA" },
+            { name: "Sarah Schupansky", pos: "MF", num: 11, bio: "Midfielder from USA" },
+            { name: "Taryn Torres", pos: "MF", num: 8, bio: "Midfielder from USA" },
+            { name: "Jaedyn Shaw", pos: "MF", num: 2, bio: "Midfielder from USA" },
+            { name: "Sofia Cook", pos: "MF", num: 21, bio: "Midfielder from USA" },
+            { name: "Josefine Hasbo", pos: "MF", num: 5, bio: "Midfielder from Denmark" },
+            { name: "Esther González", pos: "FW", num: 9, bio: "Forward from Spain" },
+            { name: "Midge Purce", pos: "FW", num: 23, bio: "Forward from USA" },
+            { name: "Ella Stevens", pos: "FW", num: 13, bio: "Forward from USA" },
+            { name: "Gabi Portilho", pos: "FW", num: 18, bio: "Forward from Brazil" },
+            { name: "Geyse Ferreira", pos: "FW", num: 10, bio: "Forward from Brazil" },
+            { name: "Khyah Harper", pos: "FW", num: 34, bio: "Forward from USA" },
+            { name: "Katie Stengel", pos: "FW", num: 28, bio: "Forward from USA" },
+            { name: "McKenna Whitham", pos: "FW", num: 17, bio: "Forward from USA" }
+        ],
         schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
-        stats: { goalLeaders: [{ name: 'Esther González', total: 9 }], assistLeaders: [{ name: 'Rose Lavelle', total: 6 }] },
-        standings: { rank: 3, points: 38, record: '10-6-8' },
-        news: [ /* News data */ ],
-        social: [ /* Social data */ ]
+        stats: { goalLeader: { name: 'Esther González', total: 9 }, assistLeader: { name: 'Rose Lavelle', total: 6 } },
+        news: [
+            { source: 'The Athletic', date: 'Oct 21, 2025', title: 'Deep Dive: The Tactical Genius Behind Gotham\'s Midfield', snippet: 'Juan Carlos Amorós has built a formidable midfield trio...', url: 'https://theathletic.com/nwsl/' }
+        ],
+        social: [
+            { user: "Gotham FC", handle: "@GothamFC", time: "2h", type: "twitter", content: "PLAYOFFS CLINCHED." }
+        ]
     };
     
     async function fetchData(url, processor, fallback) {
@@ -179,20 +143,6 @@ exports.handler = async function(event, context) {
         }
     }
     
-    async function fetchAllStats() {
-        const categories = ['standard', 'shooting', 'passing', 'defending', 'goalkeeping'];
-        try {
-            const statPromises = categories.map(category => 
-                fetch(NWSL_STATS_BASE_URL + category).then(res => res.json()).then(data => ({category, data}))
-            );
-            const statsResponses = await Promise.all(statPromises);
-            return processStatsData(statsResponses);
-        } catch (error) {
-            console.error('Failed to fetch some or all stats categories, using fallback.', error);
-            return fallbackData.stats;
-        }
-    }
-    
     async function fetchLiveNews() {
         try {
             const searchResults = await google({ query: "latest Gotham FC news", limit: 10 });
@@ -205,19 +155,17 @@ exports.handler = async function(event, context) {
         }
     }
 
-    const [roster, schedule, stats, standings, news] = await Promise.all([
+    const [roster, schedule, statsData, news] = await Promise.all([
         fetchData(NWSL_ROSTER_API_URL, processNWSLRosterData, fallbackData.roster),
         fetchData(NWSL_SCHEDULE_API_URL, processScheduleData, fallbackData.schedule),
-        fetchAllStats(),
-        fetchData(NWSL_STANDINGS_API_URL, processStandingsData, fallbackData.standings),
+        fetchData(NWSL_STATS_API_URL, processStatsData, fallbackData.stats),
         fetchLiveNews()
     ]);
     
     const responseData = {
         roster,
         schedule,
-        stats,
-        standings,
+        stats: statsData,
         news,
         social: fallbackData.social // Social feed still uses fallback
     };
