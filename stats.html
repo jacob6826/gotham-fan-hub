@@ -54,10 +54,7 @@
                 <p class="text-center text-gray-400">Loading standings...</p>
             </div>
 
-            <!-- Player Leaders -->
-            <div id="player-leaders-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
-                 <p class="text-center text-gray-400">Loading player leaders...</p>
-            </div>
+            <!-- Player Leaders REMOVED -->
 
             <!-- Visual Stats -->
             <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
@@ -106,7 +103,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const standingsContainer = document.getElementById('standings-container');
-            const playerLeadersContainer = document.getElementById('player-leaders-container');
             
             // Tab Elements
             const tabs = document.querySelectorAll('.tab-button');
@@ -169,38 +165,7 @@
                 }
             }
             
-            function renderPlayerLeaders(stats) {
-                let html = '<h2 class="text-2xl font-bold text-white mb-4 text-center">Player Leaders</h2><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">';
-                const statCategories = [
-                    { title: 'Goal Leaders', leaders: stats.goalLeaders, statName: 'Goals' },
-                    { title: 'Assist Leaders', leaders: stats.assistLeaders, statName: 'Assists' },
-                    { title: 'Shot Leaders', leaders: stats.shotLeaders, statName: 'Shots' },
-                    { title: 'Tackle Leaders (Won)', leaders: stats.tackleLeaders, statName: 'Tackles' },
-                    { title: 'Interception Leaders', leaders: stats.interceptionLeaders, statName: 'INT' },
-                    { title: 'Headed Duels Won', leaders: stats.headedDuelLeaders, statName: 'Duels' },
-                ];
-
-                let contentRendered = false;
-                statCategories.forEach(cat => {
-                    if (cat.leaders && cat.leaders.length > 0) {
-                        contentRendered = true;
-                        html += `<div><h3 class="text-lg font-semibold gotham-accent mb-2">${cat.title}</h3><ul class="space-y-1">`;
-                        cat.leaders.forEach((player, index) => {
-                            html += `<li class="flex justify-between items-center gotham-bg-highlight p-2 rounded-md text-sm">
-                                <span>${index + 1}. ${player.name}</span>
-                                <span class="font-bold">${player.total}</span>
-                            </li>`;
-                        });
-                        html += `</ul></div>`;
-                    }
-                });
-                if (!contentRendered) {
-                    playerLeadersContainer.innerHTML = '<h2 class="text-2xl font-bold text-white mb-4 text-center">Player Leaders</h2><p class="text-center text-gray-400">Player leader data is currently unavailable.</p>';
-                    return;
-                }
-                html += '</div>';
-                playerLeadersContainer.innerHTML = html;
-            }
+            // renderPlayerLeaders function REMOVED
 
             function renderTeamStatsGrids(stats) {
                 // --- Overall Tab ---
@@ -334,7 +299,7 @@
                     const data = await response.json();
                     
                     renderStandings(data.standings);
-                    renderPlayerLeaders(data.stats);
+                    // renderPlayerLeaders(data.stats); // REMOVED
                     renderTeamStatsGrids(data.stats);
                     renderCharts(data.stats);
 
@@ -342,7 +307,7 @@
                     console.error('Error fetching site data:', error);
                     const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
                     standingsContainer.innerHTML = errorMessage;
-                    playerLeadersContainer.innerHTML = errorMessage;
+                    // playerLeadersContainer.innerHTML = errorMessage; // REMOVED
                     // Clear all tab content on error
                     tabOverall.innerHTML = errorMessage;
                     tabAttacking.innerHTML = errorMessage;
