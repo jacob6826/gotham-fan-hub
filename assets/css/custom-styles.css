@@ -15,7 +15,8 @@ body::after {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.5) 0%, #000000 80%);
+    /* UPDATED: Gradient now fades to black at 100% instead of 80% */
+    background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.5) 0%, #000000 100%);
     background-repeat: no-repeat;
     z-index: -2; /* Place behind the texture */
 }
