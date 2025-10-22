@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>Gotham FC Fan Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/custom-styles.css">
 </head>
 <body class="text-gray-200">
@@ -18,8 +18,8 @@
             <div class="flex items-center space-x-4">
                 <svg class="h-12 w-12 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#22d3ee"/>
-                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#111827"/>
-                    <text x="50" y="62" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
+                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#000000"/>
+                    <text x="50" y="62" font-family="Saira Semi Condensed, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
                 </svg>
                 <div>
                     <h1 class="text-3xl font-bold text-white">Gotham FC Fan Hub</h1>
@@ -28,82 +28,76 @@
             </div>
         </header>
 
-        <!-- Main Grid -->
+        <!-- Main Grid - UPDATED to handle responsive order -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <!-- Left Column: Main Info -->
-            <div class="lg:col-span-2 space-y-8">
-                <!-- Upcoming Match & Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Upcoming Match -->
-                    <div id="upcoming-match-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
-                         <p class="text-center text-gray-400">Loading upcoming match...</p>
-                    </div>
+            <!-- 1. Upcoming Match -->
+            <div id="upcoming-match-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
+                 <p class="text-center text-gray-400">Loading upcoming match...</p>
+            </div>
 
-                    <!-- Team Stats -->
-                    <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
-                        <h2 class="text-2xl font-bold text-white mb-4 text-center">Team Stats</h2>
-                        <div id="team-stats-container" class="space-y-3 flex-grow">
-                            <p class="text-center text-gray-400">Loading team stats...</p>
-                        </div>
-                        <div class="mt-6 space-y-2">
-                             <a href="./stats.html" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
-                                See More Stats
-                            </a>
-                        </div>
-                    </div>
+            <!-- 2. Current Standings -->
+            <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                 <p class="text-center text-gray-400">Loading standings...</p>
+            </div>
+
+            <!-- 3. Team Stats -->
+            <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
+                <h2 class="text-2xl font-bold text-white mb-4 text-center">Team Stats</h2>
+                <div id="team-stats-container" class="space-y-3 flex-grow">
+                    <p class="text-center text-gray-400">Loading team stats...</p>
                 </div>
-
-                <!-- Quick Links Section -->
-                <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
-                    <h2 class="text-2xl font-bold text-white mb-4 text-center">News & Quick Links</h2>
-                    <div class="space-y-3">
-                        <a href="https://www.gothamfc.com/news" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                            <span class="font-semibold text-white">Official Team News</span>
-                            <span class="gotham-accent font-bold">&rarr;</span>
-                        </a>
-                         <a href="https://news.google.com/search?q=gotham%20fc&hl=en-US&gl=US&ceid=US%3Aen" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                            <span class="font-semibold text-white">Google News</span>
-                            <span class="gotham-accent font-bold">&rarr;</span>
-                        </a>
-                        <a href="https://www.hudsonriverblue.com/tag/gotham-fc/" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                            <span class="font-semibold text-white">Hudson River Blue</span>
-                            <span class="gotham-accent font-bold">&rarr;</span>
-                        </a>
-                        <a href="https://www.espn.com/soccer/team/_/id/15364/gotham-fc" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                            <span class="font-semibold text-white">ESPN</span>
-                            <span class="gotham-accent font-bold">&rarr;</span>
-                        </a>
-                        <a href="https://www.nytimes.com/athletic/football/team/gotham/" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                            <span class="font-semibold text-white">The Athletic</span>
-                            <span class="gotham-accent font-bold">&rarr;</span>
-                        </a>
-                        <a href="https://www.goal.com/en-us/team/nj-ny-gotham-fc/news/bgkfdckqfqnfbmecbtz03n76d" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                            <span class="font-semibold text-white">Goal.com</span>
-                            <span class="gotham-accent font-bold">&rarr;</span>
-                        </a>
-                    </div>
+                <div class="mt-6 space-y-2">
+                     <a href="./roster.html" class="gotham-button block w-full text-center py-3 px-4 rounded-lg font-bold">
+                        View Full Roster
+                    </a>
+                    <a href="./stats.html" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
+                        See More Stats
+                    </a>
                 </div>
             </div>
 
-            <!-- Right Column: Standings & Socials -->
-            <div class="lg:col-span-1 space-y-8">
-                 <!-- Current Standings -->
-                <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
-                     <p class="text-center text-gray-400">Loading standings...</p>
+            <!-- 4. Quick Links Section -->
+            <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border lg:col-span-2">
+                <h2 class="text-2xl font-bold text-white mb-4 text-center">News & Quick Links</h2>
+                <div class="space-y-3">
+                    <a href="https://www.gothamfc.com/news" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
+                        <span class="font-semibold text-white">Official Team News</span>
+                        <span class="gotham-accent font-bold">&rarr;</span>
+                    </a>
+                     <a href="https://news.google.com/search?q=gotham%20fc&hl=en-US&gl=US&ceid=US%3Aen" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
+                        <span class="font-semibold text-white">Google News</span>
+                        <span class="gotham-accent font-bold">&rarr;</span>
+                    </a>
+                    <a href="https://www.hudsonriverblue.com/tag/gotham-fc/" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
+                        <span class="font-semibold text-white">Hudson River Blue</span>
+                        <span class="gotham-accent font-bold">&rarr;</span>
+                    </a>
+                    <a href="https://www.espn.com/soccer/team/_/id/15364/gotham-fc" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
+                        <span class="font-semibold text-white">ESPN</span>
+                        <span class="gotham-accent font-bold">&rarr;</span>
+                    </a>
+                    <a href="https://www.nytimes.com/athletic/football/team/gotham/" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
+                        <span class="font-semibold text-white">The Athletic</span>
+                        <span class="gotham-accent font-bold">&rarr;</span>
+                    </a>
+                    <a href="https://www.goal.com/en-us/team/nj-ny-gotham-fc/news/bgkfdckqfqnfbmecbtz03n76d" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
+                        <span class="font-semibold text-white">Goal.com</span>
+                        <span class="gotham-accent font-bold">&rarr;</span>
+                    </a>
                 </div>
-                
-                <!-- Supporters Corner -->
-                <div class="gotham-bg rounded-xl shadow-lg p-5 border border-gotham-border">
-                    <h2 class="text-xl font-bold text-white mb-4 text-center">Supporters Corner</h2>
-                     <div class="gotham-bg-highlight p-4 rounded-lg text-center">
-                        <p class="text-2xl font-extrabold gotham-accent">Cloud 9</p>
-                        <p class="text-white mt-2">The original supporters of NJ/NY Gotham FC.</p>
-                        <a href="https://cloud9goth.com/" target="_blank" rel="noopener noreferrer">
-                            <button class="gotham-button w-full mt-4 py-2 px-4 rounded-lg font-bold">Visit Website</button>
-                        </a>
-                     </div>
-                </div>
+            </div>
+
+            <!-- 5. Supporters Corner -->
+            <div class="gotham-bg rounded-xl shadow-lg p-5 border border-gotham-border lg:col-span-1">
+                <h2 class="text-xl font-bold text-white mb-4 text-center">Supporters Corner</h2>
+                 <div class="gotham-bg-highlight p-4 rounded-lg text-center">
+                    <p class="text-2xl font-extrabold gotham-accent">Cloud 9</p>
+                    <p class="text-white mt-2">The original supporters of NJ/NY Gotham FC.</p>
+                    <a href="https://cloud9goth.com/" target="_blank" rel="noopener noreferrer">
+                        <button class="gotham-button w-full mt-4 py-2 px-4 rounded-lg font-bold">Visit Website</button>
+                    </a>
+                 </div>
             </div>
         </div>
     </div>
@@ -139,15 +133,9 @@
                             </div>
                             <p class="text-gray-300"><span class="font-semibold">Location:</span> ${nextMatch.location}</p>
                             <p class="text-gray-300"><span class="font-semibold">Watch on:</span> ${nextMatch.broadcast}</p>
-                        </div>
-                        <a href="./roster.html" class="gotham-button block w-full text-center mt-6 py-3 px-4 rounded-lg font-bold">
-                            View Full Roster
-                        </a>`;
+                        </div>`;
                 } else {
-                    upcomingMatchContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Upcoming Match</h2><div class="flex-grow flex items-center justify-center"><p class="text-center text-gray-400">No upcoming matches scheduled.</p></div>
-                    <a href="./roster.html" class="gotham-button block w-full text-center mt-6 py-3 px-4 rounded-lg font-bold">
-                        View Full Roster
-                    </a>`;
+                    upcomingMatchContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Upcoming Match</h2><div class="flex-grow flex items-center justify-center"><p class="text-center text-gray-400">No upcoming matches scheduled.</p></div>`;
                 }
             }
             
