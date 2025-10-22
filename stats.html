@@ -54,11 +54,9 @@
                 <p class="text-center text-gray-400">Loading standings...</p>
             </div>
 
-            <!-- Player Leaders REMOVED -->
-
             <!-- Visual Stats -->
             <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">Visual Breakdown</h2>
+                <!-- Title Removed -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
                         <h3 class="text-lg font-semibold text-white text-center mb-2">Goal Types</h3>
@@ -165,8 +163,6 @@
                 }
             }
             
-            // renderPlayerLeaders function REMOVED
-
             function renderTeamStatsGrids(stats) {
                 // --- Overall Tab ---
                 let overallHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
@@ -299,7 +295,6 @@
                     const data = await response.json();
                     
                     renderStandings(data.standings);
-                    // renderPlayerLeaders(data.stats); // REMOVED
                     renderTeamStatsGrids(data.stats);
                     renderCharts(data.stats);
 
@@ -307,7 +302,6 @@
                     console.error('Error fetching site data:', error);
                     const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
                     standingsContainer.innerHTML = errorMessage;
-                    // playerLeadersContainer.innerHTML = errorMessage; // REMOVED
                     // Clear all tab content on error
                     tabOverall.innerHTML = errorMessage;
                     tabAttacking.innerHTML = errorMessage;
