@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gotham FC Fan Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +37,7 @@
             </div>
 
             <!-- 2. Current Standings -->
-            <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+            <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
                  <p class="text-center text-gray-400">Loading standings...</p>
             </div>
 
@@ -48,9 +48,7 @@
                     <p class="text-center text-gray-400">Loading team stats...</p>
                 </div>
                 <div class="mt-6 space-y-2">
-                     <a href="./roster.html" class="gotham-button block w-full text-center py-3 px-4 rounded-lg font-bold">
-                        View Full Roster
-                    </a>
+                    <!-- Roster Button Removed From Here -->
                     <a href="./stats.html" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
                         See More Stats
                     </a>
@@ -143,7 +141,7 @@
                  if (standings) {
                     standingsContainer.innerHTML = `
                         <h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2>
-                        <div class="gotham-bg-highlight p-4 rounded-lg text-center space-y-2">
+                        <div class="gotham-bg-highlight p-4 rounded-lg text-center space-y-2 flex-grow">
                             <div>
                                 <p class="text-sm text-gray-400">League Rank</p>
                                 <p class="gotham-accent font-extrabold text-4xl">${standings.rank}</p>
@@ -158,9 +156,17 @@
                                     <p class="font-bold text-xl">${standings.record}</p>
                                 </div>
                             </div>
-                        </div>`;
+                        </div>
+                        <!-- Roster Button Moved Here -->
+                        <a href="./roster.html" class="gotham-button block w-full text-center mt-4 py-3 px-4 rounded-lg font-bold">
+                            View Full Roster
+                        </a>`;
                 } else {
-                    standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2><p class="text-center text-gray-400">Standings unavailable.</p>`;
+                    standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2><div class="flex-grow flex items-center justify-center"><p class="text-center text-gray-400">Standings unavailable.</p></div>
+                    <!-- Roster Button Also Added to Failure Case -->
+                    <a href="./roster.html" class="gotham-button block w-full text-center mt-4 py-3 px-4 rounded-lg font-bold">
+                        View Full Roster
+                    </a>`;
                 }
             }
             
