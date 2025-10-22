@@ -11,7 +11,10 @@ const normalizeName = (name) => {
 
 // Helper function to process the official NWSL roster API data and enrich it with sheet data
 const processNWSLRosterData = (apiData, enrichmentData) => {
-    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { return []; }
+    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { 
+        console.error("Roster API data is missing the 'players' array.");
+        return []; 
+    }
     const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
     
     return activePlayers.map(player => {
@@ -71,6 +74,7 @@ const processScheduleData = (apiData) => {
 const processAllStatsData = (statsResponses) => {
     const processedStats = {};
 
+    // First, get all team-level stats from the 'general' category
     const generalData = statsResponses.find(r => r.category === 'general')?.data;
     if (generalData && generalData.team && generalData.team.stats) {
         generalData.team.stats.forEach(stat => {
@@ -78,6 +82,7 @@ const processAllStatsData = (statsResponses) => {
         });
     }
 
+    // Helper to find and format a specific stat leader list
     const getStatLeaders = (data, statName, count = 3) => {
         if (!data || !data.data || !data.data.stats) return [];
         const stat = data.data.stats.find(s => s.name === statName);
@@ -88,6 +93,7 @@ const processAllStatsData = (statsResponses) => {
         }));
     };
 
+    // Get player leader data from other categories
     const standardData = statsResponses.find(r => r.category === 'standard')?.data;
     const shootingData = statsResponses.find(r => r.category === 'shooting')?.data;
     const defendingData = statsResponses.find(r => r.category === 'defending')?.data;
@@ -169,6 +175,7 @@ exports.handler = async function(event, context) {
         }
     }
     
+    // UPDATED: Fetch all stat categories
     async function fetchAllStats() {
         const categories = ['general', 'standard', 'shooting', 'defending'];
         try {
