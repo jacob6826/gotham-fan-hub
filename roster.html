@@ -85,7 +85,6 @@
                             const placeholderText = player.name.split(' ').map(n => n[0]).join('');
                             const imageUrl = player.headshot || `https://placehold.co/150x150/374151/FFFFFF?text=${placeholderText}`;
                             
-                            // UPDATED: Removed hover:scale-105 from the div
                             const cardContent = `
                                 <div class="gotham-bg rounded-xl shadow-lg p-5 text-center border border-gotham-border h-full">
                                     <img class="w-24 h-24 rounded-full mx-auto -mt-12 border-4 border-gotham-accent object-cover bg-gray-700" 
@@ -95,5 +94,65 @@
                                     <p class="text-2xl font-bold gotham-accent mt-4">${player.num}</p>
                                     <h3 class="text-xl font-bold text-white mt-1">${player.name}</h3>
                                     <p class="text-gray-400 text-sm h-12">${player.bio}</p>
-                                ... (rest of your HTML)
+                                </div>
+                            `;
+
+                            // Add 'player-card-link' and 'fade-in-item' classes
+                            // Add a staggered delay for the animation
+                            const styleDelay = `style="--delay: ${index * 50}ms"`;
+
+                            if (player.pageUrl) {
+                                html += `<a href="${player.pageUrl}" target="_blank" rel="noopener noreferrer" class="player-card-link fade-in-item" ${styleDelay}>${cardContent}</a>`;
+                            } else {
+                                // If no link, add classes to a wrapper div
+                                html += `<div class="player-card-link fade-in-item" ${styleDelay}>${cardContent}</div>`;
+                            }
+                        });
+                    } else {
+                        html += `<p class="text-gray-400 col-span-full">No players listed for this position.</p>`;
+                    }
+
+                    html += `</div></section>`;
+                }
+                rosterContainer.innerHTML = html;
+            }
+
+            async function fetchAndDisplayRoster() {
+                try {
+                    const response = await fetch('./.netlify/functions/get-gotham-data');
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    renderRoster(data.roster);
+
+                    // NEW: Intersection Observer for animations
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('is-visible');
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { 
+                        threshold: 0.1 // Trigger when 10% of the item is visible
+                    });
+
+                    // Observe all the new cards
+                    const itemsToFade = document.querySelectorAll('.fade-in-item');
+                    itemsToFade.forEach(item => {
+                        observer.observe(item);
+                    });
+
+                } catch (error) {
+                    rosterContainer.innerHTML = `<p class="text-center text-red-400">Could not load roster data. Please try again later.</p>`;
+                    console.error('Error fetching roster:', error);
+                }
+            }
+
+            fetchAndDisplayRoster();
+        });
+    </script>
+</body>
+</html>
 
