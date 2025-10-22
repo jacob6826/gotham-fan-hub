@@ -1,8 +1,8 @@
 /* General Body Styles */
 body {
-    /* UPDATED: Switched from radial to linear gradient */
+    /* UPDATED: Gradient is more vibrant and extends further */
     background-color: #000000;
-    background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.3) 0%, #000000 60%); /* Starts cyan top-left, fades to black */
+    background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.5) 0%, #000000 80%); /* Starts cyan top-left, fades to black */
     background-repeat: no-repeat;
     background-attachment: fixed; /* Ensures gradient stays put on scroll */
     
