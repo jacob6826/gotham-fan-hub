@@ -1,15 +1,25 @@
 /* General Body Styles */
 body {
-    /* UPDATED: Gradient is more vibrant and extends further */
-    background-color: #000000;
-    background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.5) 0%, #000000 80%); /* Starts cyan top-left, fades to black */
-    background-repeat: no-repeat;
-    /* REMOVED: background-attachment: fixed; This line breaks the gradient on mobile */
-    
+    background-color: #000000; /* Solid black is now the base */
     font-family: 'Inter', sans-serif;
     position: relative;
     overflow-x: hidden;
+    min-height: 100vh;
 }
+
+/* NEW: Apply gradient to a fixed pseudo-element for mobile compatibility */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.5) 0%, #000000 80%);
+    background-repeat: no-repeat;
+    z-index: -2; /* Place behind the texture */
+}
+
 
 /* Background texture pseudo-element */
 body::before {
@@ -27,7 +37,7 @@ body::before {
     background-repeat: no-repeat;
     background-size: contain;
     opacity: 0.03; 
-    z-index: -1;
+    z-index: -1; /* Place in front of the gradient, behind content */
 }
 
 /* Apply the title font to all headers */
@@ -136,5 +146,4 @@ h1, h2, h3, .font-title {
 ::-webkit-scrollbar-thumb:hover {
     background-color: #4B5563;
 }
-
 
