@@ -7,8 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- UPDATED: Import Inter and Saira Semi Condensed fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/custom-styles.css">
+    <style>
+        /* Styles for the active tab */
+        .tab-active {
+            background-color: #06b6d4;
+            color: #ffffff;
+        }
+        /* Styles for inactive tabs */
+        .tab-inactive {
+            background-color: #222222; /* gotham-bg-highlight */
+            color: #d1d5db; /* gray-300 */
+        }
+    </style>
 </head>
 <body class="text-gray-200">
 
@@ -19,8 +34,8 @@
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
                 <svg class="h-12 w-12 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#22d3ee"/>
-                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#111827"/>
-                    <text x="50" y="62" font-family="Inter, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
+                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#000000"/>
+                    <text x="50" y="62" font-family="Saira Semi Condensed, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
                 </svg>
                 <div>
                     <h1 class="text-3xl font-bold text-white">Team Statistics</h1>
@@ -34,12 +49,56 @@
 
         <!-- Main Content: Stats Display -->
         <main id="stats-page-container" class="space-y-8">
+            <!-- Standings -->
             <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
                 <p class="text-center text-gray-400">Loading standings...</p>
             </div>
 
-            <div id="team-stats-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
-                 <p class="text-center text-gray-400">Loading team stats...</p>
+            <!-- Player Leaders -->
+            <div id="player-leaders-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                 <p class="text-center text-gray-400">Loading player leaders...</p>
+            </div>
+
+            <!-- Visual Stats -->
+            <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Visual Breakdown</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white text-center mb-2">Goal Types</h3>
+                        <div class="gotham-bg-highlight rounded-lg p-4 h-64 flex items-center justify-center">
+                            <canvas id="goalTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-white text-center mb-2">Home vs. Away Record</h3>
+                        <div class="gotham-bg-highlight rounded-lg p-4 h-64 flex items-center justify-center">
+                            <canvas id="homeAwayChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabbed Detailed Stats -->
+            <div class="gotham-bg rounded-xl shadow-lg border border-gotham-border">
+                <h2 class="text-2xl font-bold text-white p-6 text-center">Detailed Team Stats</h2>
+                <!-- Tab Headers -->
+                <div class="flex space-x-1 px-6">
+                    <button id="tab-overall" class="tab-button tab-active py-2 px-4 rounded-t-lg font-bold font-title">Overall</button>
+                    <button id="tab-attacking" class="tab-button tab-inactive py-2 px-4 rounded-t-lg font-bold font-title">Attacking</button>
+                    <button id="tab-defending" class="tab-button tab-inactive py-2 px-4 rounded-t-lg font-bold font-title">Defending</button>
+                </div>
+                <!-- Tab Content -->
+                <div class="gotham-bg-highlight p-6 rounded-b-lg rounded-tr-lg">
+                    <div id="tab-content-overall" class="tab-content">
+                        <p class="text-center text-gray-400">Loading stats...</p>
+                    </div>
+                    <div id="tab-content-attacking" class="tab-content hidden">
+                        <p class="text-center text-gray-400">Loading stats...</p>
+                    </div>
+                    <div id="tab-content-defending" class="tab-content hidden">
+                        <p class="text-center text-gray-400">Loading stats...</p>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -47,8 +106,43 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const standingsContainer = document.getElementById('standings-container');
-            const teamStatsContainer = document.getElementById('team-stats-container');
+            const playerLeadersContainer = document.getElementById('player-leaders-container');
+            
+            // Tab Elements
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const tabOverall = document.getElementById('tab-content-overall');
+            const tabAttacking = document.getElementById('tab-content-attacking');
+            const tabDefending = document.getElementById('tab-content-defending');
+            
+            // Chart Canvases
+            const goalChartCtx = document.getElementById('goalTypeChart')?.getContext('2d');
+            const homeAwayChartCtx = document.getElementById('homeAwayChart')?.getContext('2d');
+            
+            let goalChart, homeAwayChart;
 
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.replace('tab-active', 'tab-inactive'));
+                    tab.classList.replace('tab-inactive', 'tab-active');
+                    
+                    tabContents.forEach(c => c.classList.add('hidden'));
+                    document.getElementById(`tab-content-${tab.id.split('-')[1]}`).classList.remove('hidden');
+                });
+            });
+
+            // Helper to safely get a stat value
+            const getStat = (stats, id) => stats?.[id]?.value ?? 'N/A';
+            const formatPercent = (stats, id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : 'N/A';
+            
+            // Helper to build a single stat card for the grid
+            const buildStatCard = (label, value) => `
+                <div class="gotham-bg p-4 rounded-lg text-center">
+                    <p class="text-sm text-gray-400">${label}</p>
+                    <p class="gotham-accent font-extrabold text-3xl">${value}</p>
+                </div>
+            `;
+            
             function renderStandings(standings) {
                  if (standings) {
                     standingsContainer.innerHTML = `
@@ -74,36 +168,165 @@
                     standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2><p class="text-center text-gray-400">Standings unavailable.</p>`;
                 }
             }
-
-            function renderTeamStats(stats) {
-                const getStat = (id) => stats?.[id]?.value ?? 'N/A';
-                const formatPercent = (id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : 'N/A';
-
-                let html = '<h2 class="text-2xl font-bold text-white mb-4 text-center">Overall Team Stats</h2><div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
-                const teamStats = [
-                    { label: 'Goals Scored', value: getStat('goals-scored') },
-                    { label: 'Goals Conceded', value: getStat('goals-conceded') },
-                    { label: 'Shooting Accuracy', value: formatPercent('Shooting Accuracy') },
-                    { label: 'Passing Accuracy', value: formatPercent('Passing Accuracy') },
-                    { label: 'Tackle Success %', value: formatPercent('Tackle Success') },
-                    { label: 'Clean Sheets', value: getStat('Clean Sheets') },
-                    { label: 'Yellow Cards', value: getStat('yellow-cards') },
-                    { label: 'Red Cards', value: getStat('red-cards') },
+            
+            function renderPlayerLeaders(stats) {
+                let html = '<h2 class="text-2xl font-bold text-white mb-4 text-center">Player Leaders</h2><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">';
+                const statCategories = [
+                    { title: 'Goal Leaders', leaders: stats.goalLeaders, statName: 'Goals' },
+                    { title: 'Assist Leaders', leaders: stats.assistLeaders, statName: 'Assists' },
+                    { title: 'Shot Leaders', leaders: stats.shotLeaders, statName: 'Shots' },
+                    { title: 'Tackle Leaders (Won)', leaders: stats.tackleLeaders, statName: 'Tackles' },
+                    { title: 'Interception Leaders', leaders: stats.interceptionLeaders, statName: 'INT' },
+                    { title: 'Headed Duels Won', leaders: stats.headedDuelLeaders, statName: 'Duels' },
                 ];
 
-                teamStats.forEach(stat => {
-                    html += `
-                        <div class="gotham-bg-highlight p-4 rounded-lg text-center">
-                            <p class="text-sm text-gray-400">${stat.label}</p>
-                            <p class="gotham-accent font-extrabold text-3xl">${stat.value}</p>
-                        </div>
-                    `;
+                let contentRendered = false;
+                statCategories.forEach(cat => {
+                    if (cat.leaders && cat.leaders.length > 0) {
+                        contentRendered = true;
+                        html += `<div><h3 class="text-lg font-semibold gotham-accent mb-2">${cat.title}</h3><ul class="space-y-1">`;
+                        cat.leaders.forEach((player, index) => {
+                            html += `<li class="flex justify-between items-center gotham-bg-highlight p-2 rounded-md text-sm">
+                                <span>${index + 1}. ${player.name}</span>
+                                <span class="font-bold">${player.total}</span>
+                            </li>`;
+                        });
+                        html += `</ul></div>`;
+                    }
                 });
-                
+                if (!contentRendered) {
+                    playerLeadersContainer.innerHTML = '<h2 class="text-2xl font-bold text-white mb-4 text-center">Player Leaders</h2><p class="text-center text-gray-400">Player leader data is currently unavailable.</p>';
+                    return;
+                }
                 html += '</div>';
-                teamStatsContainer.innerHTML = html;
+                playerLeadersContainer.innerHTML = html;
             }
 
+            function renderTeamStatsGrids(stats) {
+                // --- Overall Tab ---
+                let overallHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
+                overallHtml += buildStatCard('Games Played', getStat(stats, 'played'));
+                overallHtml += buildStatCard('Points', getStat(stats, 'points'));
+                overallHtml += buildStatCard('Wins', getStat(stats, 'wins'));
+                overallHtml += buildStatCard('Draws', getStat(stats, 'draws'));
+                overallHtml += buildStatCard('Losses', getStat(stats, 'losses'));
+                overallHtml += buildStatCard('Goals Difference', getStat(stats, 'goals-difference'));
+                overallHtml += buildStatCard('Clean Sheets', getStat(stats, 'Clean Sheets'));
+                overallHtml += buildStatCard('Possession %', formatPercent(stats, 'Possession Percentage'));
+                overallHtml += '</div>';
+                tabOverall.innerHTML = overallHtml;
+                
+                // --- Attacking Tab ---
+                let attackingHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
+                attackingHtml += buildStatCard('Goals Scored', getStat(stats, 'goals-scored'));
+                attackingHtml += buildStatCard('Assists', getStat(stats, 'Goal Assists'));
+                attackingHtml += buildStatCard('Total Shots', getStat(stats, 'Total Shots'));
+                attackingHtml += buildStatCard('Shots on Target', getStat(stats, 'Shots On Target ( inc goals )'));
+                attackingHtml += buildStatCard('Shooting Accuracy', formatPercent(stats, 'Shooting Accuracy'));
+                attackingHtml += buildStatCard('Goals from Inside Box', getStat(stats, 'Goals from Inside Box'));
+                attackingHtml += buildStatCard('Goals from Outside Box', getStat(stats, 'Goals from Outside Box'));
+                attackingHtml += buildStatCard('Headed Goals', getStat(stats, 'Headed Goals'));
+                attackingHtml += buildStatCard('Corners Taken', getStat(stats, 'Corners Taken (incl short corners)'));
+                attackingHtml += buildStatCard('Key Passes', getStat(stats, 'Key Passes (Attempt Assists)'));
+                attackingHtml += buildStatCard('Passing Accuracy', formatPercent(stats, 'Passing Accuracy'));
+                attackingHtml += buildStatCard('Successful Dribbles', getStat(stats, 'Successful Dribbles'));
+                attackingHtml += '</div>';
+                tabAttacking.innerHTML = attackingHtml;
+
+                // --- Defending Tab ---
+                let defendingHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">';
+                defendingHtml += buildStatCard('Goals Conceded', getStat(stats, 'goals-conceded'));
+                defendingHtml += buildStatCard('Tackles Won', getStat(stats, 'Tackles Won'));
+                defendingHtml += buildStatCard('Tackle Success %', formatPercent(stats, 'Tackle Success'));
+                defendingHtml += buildStatCard('Interceptions', getStat(stats, 'Interceptions'));
+                defendingHtml += buildStatCard('Total Clearances', getStat(stats, 'Total Clearances'));
+                defendingHtml += buildStatCard('Aerial Duels Won', getStat(stats, 'Aerial Duels won'));
+                defendingHtml += buildStatCard('Ground Duels Won', getStat(stats, 'Ground Duels won'));
+                defendingHtml += buildStatCard('Recoveries', getStat(stats, 'Recoveries'));
+                defendingHtml += buildStatCard('Fouls Committed', getStat(stats, 'fouls-committed'));
+                defendingHtml += buildStatCard('Yellow Cards', getStat(stats, 'yellow-cards'));
+                defendingHtml += buildStatCard('Red Cards', getStat(stats, 'red-cards'));
+                defendingHtml += '</div>';
+                tabDefending.innerHTML = defendingHtml;
+            }
+
+            function renderCharts(stats) {
+                if (goalChart) goalChart.destroy();
+                if (homeAwayChart) homeAwayChart.destroy();
+                
+                // Chart Defaults
+                Chart.defaults.color = '#d1d5db';
+                Chart.defaults.font.family = 'Inter, sans-serif';
+
+                // --- Goal Type Donut Chart ---
+                const goalsInside = getStat(stats, 'Goals from Inside Box');
+                const goalsOutside = getStat(stats, 'Goals from Outside Box');
+                const goalsHeaded = getStat(stats, 'Headed Goals');
+                if (goalChartCtx && goalsInside !== 'N/A' && goalsOutside !== 'N/A' && goalsHeaded !== 'N/A') {
+                    goalChart = new Chart(goalChartCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Inside Box', 'Outside Box', 'Headed'],
+                            datasets: [{
+                                data: [goalsInside, goalsOutside, goalsHeaded],
+                                backgroundColor: ['#22d3ee', '#ffffff', '#6B7280'],
+                                borderColor: '#111111',
+                                borderWidth: 4,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: '#d1d5db' } },
+                            }
+                        }
+                    });
+                }
+
+                // --- Home vs. Away Bar Chart ---
+                const homeWins = getStat(stats, 'home-wins');
+                const awayWins = getStat(stats, 'away-wins');
+                const homeDraws = getStat(stats, 'home-draws');
+                const awayDraws = getStat(stats, 'away-draws');
+                const homeLosses = getStat(stats, 'home-losses');
+                const awayLosses = getStat(stats, 'away-losses');
+                
+                if (homeAwayChartCtx && homeWins !== 'N/A') {
+                    homeAwayChart = new Chart(homeAwayChartCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Wins', 'Draws', 'Losses'],
+                            datasets: [
+                                {
+                                    label: 'Home',
+                                    data: [homeWins, homeDraws, homeLosses],
+                                    backgroundColor: '#22d3ee',
+                                    borderRadius: 4
+                                },
+                                {
+                                    label: 'Away',
+                                    data: [awayWins, awayDraws, awayLosses],
+                                    backgroundColor: '#ffffff',
+                                    borderRadius: 4
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#4B5563' } },
+                                x: { grid: { display: false } }
+                            },
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: '#d1d5db' } }
+                            }
+                        }
+                    });
+                }
+            }
+            
             async function fetchAllData() {
                 try {
                     const response = await fetch('./.netlify/functions/get-gotham-data');
@@ -111,13 +334,19 @@
                     const data = await response.json();
                     
                     renderStandings(data.standings);
-                    renderTeamStats(data.stats);
+                    renderPlayerLeaders(data.stats);
+                    renderTeamStatsGrids(data.stats);
+                    renderCharts(data.stats);
 
                 } catch (error) {
                     console.error('Error fetching site data:', error);
                     const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
                     standingsContainer.innerHTML = errorMessage;
-                    teamStatsContainer.innerHTML = errorMessage;
+                    playerLeadersContainer.innerHTML = errorMessage;
+                    // Clear all tab content on error
+                    tabOverall.innerHTML = errorMessage;
+                    tabAttacking.innerHTML = errorMessage;
+                    tabDefending.innerHTML = errorMessage;
                 }
             }
 
