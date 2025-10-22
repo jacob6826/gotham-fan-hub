@@ -1,12 +1,17 @@
 /* General Body Styles */
 body {
-    background-color: #000000; /* CHANGED: Pure black background */
+    /* UPDATED: Switched from solid black to a radial gradient */
+    background-color: #000000;
+    background-image: radial-gradient(at top center, rgba(6, 182, 212, 0.3) 0%, #000000 50%);
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Ensures gradient stays put on scroll */
+    
     font-family: 'Inter', sans-serif;
-    position: relative; /* For the pseudo-element */
-    overflow-x: hidden; /* Prevent horizontal scroll from animations */
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* NEW: Background texture pseudo-element */
+/* Background texture pseudo-element */
 body::before {
     content: "";
     position: fixed;
@@ -14,15 +19,15 @@ body::before {
     left: 0;
     width: 100%;
     height: 100vh;
-    /* IMPORTANT: This assumes you have saved the logo you uploaded
+    /* This assumes you have saved the logo you uploaded
       to this path in your project: /assets/images/image_1bcd79.png
     */
     background-image: url('../images/image_1bcd79.png');
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
-    opacity: 0.03; /* Kept very faint to not be distracting */
-    z-index: -1; /* Sits behind all content */
+    opacity: 0.03; 
+    z-index: -1;
 }
 
 /* Apply the title font to all headers */
@@ -35,23 +40,27 @@ h1, h2, h3, .font-title {
 
 /* --- THEME COLORS --- */
 
+/* Background for main cards and containers */
 .gotham-bg {
     background-color: #111111;
 }
 
+/* Background for highlighted elements within cards */
 .gotham-bg-highlight {
     background-color: #222222;
 }
 
+/* The primary accent color for text, borders, etc. */
 .gotham-accent {
     color: #22d3ee;
 }
 
+/* Border color for separating elements */
 .gotham-border {
     border-color: #333333;
 }
 
-/* NEW: Enhanced hover effect for player cards */
+/* Enhanced hover effect for player cards */
 .player-card-link .gotham-bg {
      /* Make all transitions smooth. 
        We target the inner div so the whole link doesn't "glow".
