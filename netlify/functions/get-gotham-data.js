@@ -9,7 +9,7 @@ const normalizeName = (name) => {
     return name.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
-// Helper function to process the official NWSL roster API data from the /roster endpoint
+// Helper function to process the official NWSL roster API data and enrich it with sheet data
 const processNWSLRosterData = (apiData, enrichmentData) => {
     if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { 
         console.error("Roster API data is missing the 'players' array.");
@@ -117,11 +117,10 @@ const parseCsv = (csvString) => {
 };
 
 exports.handler = async function(event, context) {
-    const CURRENT_SEASON_ID = "nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c"; 
+    const CURRENT_SEASON_ID = "nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c";
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTpJmieTcb-C1k_4NDTLR_XfVUBzSc_GBrWVPAx4bt994junG5YY_S3EtZnS_0j42RwwYSYa4eGBpAq/pub?output=csv';
     const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${CURRENT_SEASON_ID}`;
-    // UPDATED: Using the specific, hardcoded URL for the schedule as requested
-    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
+    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
     const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
     const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
 
@@ -172,4 +171,3 @@ exports.handler = async function(event, context) {
         body: JSON.stringify({ roster, schedule, stats, standings })
     };
 };
-
