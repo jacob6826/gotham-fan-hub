@@ -9,7 +9,7 @@ const normalizeName = (name) => {
     return name.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
-// Helper function to process the official NWSL roster API data and enrich it with sheet data
+// Helper function to process the official NWSL roster API data from the /roster endpoint
 const processNWSLRosterData = (apiData, enrichmentData) => {
     if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { 
         console.error("Roster API data is missing the 'players' array.");
