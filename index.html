@@ -28,12 +28,12 @@
             </div>
         </header>
 
-        <!-- Main Grid - UPDATED to handle responsive order -->
+        <!-- Main Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <!-- 1. Upcoming Match -->
+            <!-- 1. Upcoming Match / Championship Card -->
             <div id="upcoming-match-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
-                 <p class="text-center text-gray-400">Loading upcoming match...</p>
+                 <p class="text-center text-gray-400">Loading...</p>
             </div>
 
             <!-- 2. Current Standings -->
@@ -48,7 +48,6 @@
                     <p class="text-center text-gray-400">Loading team stats...</p>
                 </div>
                 <div class="mt-6 space-y-2">
-                    <!-- Roster Button Removed From Here -->
                     <a href="./stats.html" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
                         See More Stats
                     </a>
@@ -58,7 +57,6 @@
             <!-- 4. Quick Links Section -->
             <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border lg:col-span-2">
                 <h2 class="text-2xl font-bold text-white mb-4 text-center">News & Quick Links</h2>
-                <!-- Links re-ordered and "Bat Signal" added -->
                 <div class="space-y-3">
                     <a href="https://www.gothamfc.com/news" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
                         <span class="font-semibold text-white">Official Team News</span>
@@ -102,7 +100,6 @@
                             <button class="gotham-button w-full mt-4 py-2 px-4 rounded-lg font-bold">Visit Website</button>
                         </a>
                      </div>
-                     <!-- New Card -->
                      <div class="gotham-bg-highlight p-4 rounded-lg text-center">
                         <p class="text-2xl font-extrabold gotham-accent">Official Team Site</p>
                         <p class="text-white mt-2">The official website for NJ/NY Gotham FC.</p>
@@ -117,12 +114,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // --- DOM Elements ---
             const upcomingMatchContainer = document.getElementById('upcoming-match-container');
             const teamStatsContainer = document.getElementById('team-stats-container');
             const standingsContainer = document.getElementById('standings-container');
 
-            // --- Render Functions ---
             function renderUpcomingMatch(schedule) {
                  const now = new Date();
                 let nextMatch = null;
@@ -130,7 +125,9 @@
                     const sortedSchedule = schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
                     nextMatch = sortedSchedule.find(match => new Date(match.date) > now);
                 }
+                
                 if (nextMatch) {
+                    // --- CASE 1: A match is scheduled in the future ---
                     const matchDate = new Date(nextMatch.date);
                     const formattedDate = matchDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
                     const formattedTime = matchDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
@@ -146,9 +143,29 @@
                             </div>
                             <p class="text-gray-300"><span class="font-semibold">Location:</span> ${nextMatch.location}</p>
                             <p class="text-gray-300"><span class="font-semibold">Watch on:</span> ${nextMatch.broadcast}</p>
-                        </div>`;
+                        </div>
+                        <a href="./roster.html" class="gotham-button block w-full text-center mt-6 py-3 px-4 rounded-lg font-bold">
+                            View Full Roster
+                        </a>`;
                 } else {
-                    upcomingMatchContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Upcoming Match</h2><div class="flex-grow flex items-center justify-center"><p class="text-center text-gray-400">No upcoming matches scheduled.</p></div>`;
+                    // --- CASE 2: No upcoming match (Offseason/Championship Mode) ---
+                    upcomingMatchContainer.innerHTML = `
+                        <h2 class="text-2xl font-bold text-white mb-2 text-center">2025 Season</h2>
+                        <div class="flex-grow flex flex-col items-center justify-center text-center space-y-4 py-4">
+                            <div class="relative w-full">
+                                <!-- Placeholder Image: You can replace the src with a real photo of the team holding the trophy -->
+                                <img src="https://placehold.co/600x350/111111/22d3ee?text=NWSL+CHAMPIONS" 
+                                     alt="Gotham FC Champions" 
+                                     class="rounded-lg shadow-lg border border-gotham-accent w-full h-48 object-cover">
+                            </div>
+                            <div>
+                                <p class="text-4xl font-black text-white uppercase tracking-wider gotham-accent">CHAMPIONS!</p>
+                                <p class="text-gray-300 mt-1 font-medium">The Bats Reign Supreme</p>
+                            </div>
+                        </div>
+                        <a href="./roster.html" class="gotham-button block w-full text-center mt-auto py-3 px-4 rounded-lg font-bold">
+                            View Championship Roster
+                        </a>`;
                 }
             }
             
@@ -171,17 +188,9 @@
                                     <p class="font-bold text-xl">${standings.record}</p>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Roster Button Moved Here -->
-                        <a href="./roster.html" class="gotham-button block w-full text-center mt-4 py-3 px-4 rounded-lg font-bold">
-                            View Full Roster
-                        </a>`;
+                        </div>`;
                 } else {
-                    standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2><div class="flex-grow flex items-center justify-center"><p class="text-center text-gray-400">Standings unavailable.</p></div>
-                    <!-- Roster Button Also Added to Failure Case -->
-                    <a href="./roster.html" class="gotham-button block w-full text-center mt-4 py-3 px-4 rounded-lg font-bold">
-                        View Full Roster
-                    </a>`;
+                    standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2><div class="flex-grow flex items-center justify-center"><p class="text-center text-gray-400">Standings unavailable.</p></div>`;
                 }
             }
             
@@ -201,7 +210,6 @@
                  `;
             }
            
-            // --- Main Data Fetching ---
             async function fetchAllData() {
                 try {
                     const response = await fetch('./.netlify/functions/get-gotham-data');
@@ -226,4 +234,3 @@
     </script>
 </body>
 </html>
-
