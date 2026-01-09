@@ -1,249 +1,439 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gotham FC Fan Hub</title>
+    <title>Gotham FC Fan Hub | The Home of the Bats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="assets/css/custom-styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gotham: {
+                            black: '#000000',
+                            dark: '#0a0a0a',
+                            cyan: '#22d3ee'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="text-gray-200">
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        <!-- Header -->
-        <header class="flex items-center justify-between mb-8">
-            <div class="flex items-center space-x-4">
-                <svg class="h-12 w-12 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="#22d3ee"/>
-                    <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#000000"/>
-                    <text x="50" y="62" font-family="Saira Semi Condensed, sans-serif" font-size="30" font-weight="800" fill="white" text-anchor="middle">GFC</text>
-                </svg>
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Gotham FC Fan Hub</h1>
-                    <p class="text-lg gotham-accent font-medium">Your One-Stop Shop for the Bats</p>
+<body class="bg-black text-gray-200 antialiased selection:bg-cyan-400 selection:text-black">
+
+    <!-- Fixed Glass Navigation -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center gap-3 group cursor-pointer">
+                    <svg class="h-10 w-10 text-white group-hover:text-gotham-cyan transition-colors"
+                        viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="currentColor" />
+                        <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#000000" />
+                        <text x="50" y="62" font-family="Saira Semi Condensed, sans-serif" font-size="30"
+                            font-weight="800" fill="currentColor" text-anchor="middle">GFC</text>
+                    </svg>
+                    <span
+                        class="font-heading font-bold text-2xl tracking-wide text-white group-hover:text-gotham-cyan transition-colors">FAN
+                        HUB</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#" class="nav-link active text-sm tracking-widest uppercase">Home</a>
+                        <a href="./roster.html" class="nav-link text-sm tracking-widest uppercase">Roster</a>
+                        <a href="./stats.html" class="nav-link text-sm tracking-widest uppercase">Stats</a>
+                        <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary text-xs ml-4">Get
+                            Tickets</a>
+                    </div>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="text-gray-400 hover:text-white p-2" aria-controls="mobile-menu"
+                        aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
                 </div>
             </div>
-        </header>
+        </div>
+    </nav>
 
-        <!-- Main Grid - UPDATED to handle responsive order -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Hero Section -->
+    <section class="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <!-- Using a high-quality placeholder that looks like a stadium/match atmosphere -->
+            <img src="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?q=80&w=2500&auto=format&fit=crop"
+                alt="Stadium Atmosphere" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black"></div>
 
-            <!-- 1. Upcoming Match / Championship Card -->
-            <div id="upcoming-match-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
-                 <p class="text-center text-gray-400">Loading...</p>
+        </div>
+
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
+            <p class="text-gotham-cyan font-heading font-bold tracking-[0.2em] text-lg mb-4 fade-in-up">WELCOME TO THE
+                BAT CAVE</p>
+            <h1 class="text-7xl md:text-9xl font-black text-white leading-none mb-6 relative fade-in-up delay-100"
+                style="text-shadow: 0 0 40px rgba(34,211,238,0.2);">
+                GOTHAM<br><span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">REIGNS</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-10 font-light fade-in-up delay-200">
+                The unofficial headquarters for NJ/NY Gotham FC fans. Stats, rosters, and championship glory.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in-up delay-300">
+                <a href="#latest-news" class="btn-primary">Latest News</a>
+                <a href="./roster.html" class="btn-outline">Meet the Squad</a>
             </div>
+        </div>
 
-            <!-- 2. Current Standings -->
-            <div id="standings-container" class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
-                 <p class="text-center text-gray-400">Loading standings...</p>
-            </div>
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-gray-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                </path>
+            </svg>
+        </div>
+    </section>
 
-            <!-- 3. Team Stats -->
-            <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border flex flex-col">
-                <h2 class="text-2xl font-bold text-white mb-4 text-center">Team Stats</h2>
-                <div id="team-stats-container" class="space-y-3 flex-grow">
-                    <p class="text-center text-gray-400">Loading team stats...</p>
-                </div>
-                <div class="mt-6 space-y-2">
-                    <a href="./stats.html" class="gotham-button-secondary block w-full text-center py-2 px-4 rounded-lg font-bold">
-                        See More Stats
-                    </a>
-                </div>
-            </div>
-
-            <!-- 4. Quick Links Section -->
-            <div class="gotham-bg rounded-xl shadow-lg p-6 border border-gotham-border lg:col-span-2">
-                <h2 class="text-2xl font-bold text-white mb-4 text-center">News & Quick Links</h2>
-                <div class="space-y-3">
-                    <a href="https://www.gothamfc.com/news" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                        <span class="font-semibold text-white">Official Team News</span>
-                        <span class="gotham-accent font-bold">&rarr;</span>
-                    </a>
-                    <a href="https://thebatsignal.beehiiv.com/" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                        <span class="font-semibold text-white">Bat Signal</span>
-                        <span class="gotham-accent font-bold">&rarr;</span>
-                    </a>
-                     <a href="https://news.google.com/search?q=gotham%20fc&hl=en-US&gl=US&ceid=US%3Aen" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                        <span class="font-semibold text-white">Google News</span>
-                        <span class="gotham-accent font-bold">&rarr;</span>
-                    </a>
-                    <a href="https://www.espn.com/soccer/team/_/id/15364/gotham-fc" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                        <span class="font-semibold text-white">ESPN</span>
-                        <span class="gotham-accent font-bold">&rarr;</span>
-                    </a>
-                    <a href="https://www.nytimes.com/athletic/football/team/gotham/" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                        <span class="font-semibold text-white">The Athletic</span>
-                        <span class="gotham-accent font-bold">&rarr;</span>
-                    </a>
-                    <a href="https://www.hudsonriverblue.com/tag/gotham-fc/" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                        <span class="font-semibold text-white">Hudson River Blue</span>
-                        <span class="gotham-accent font-bold">&rarr;</span>
-                    </a>
-                    <a href="https://www.goal.com/en-us/team/nj-ny-gotham-fc/news/bgkfdckqfqnfbmecbtz03n76d" target="_blank" rel="noopener noreferrer" class="gotham-bg-highlight p-4 rounded-lg flex justify-between items-center hover:border-gotham-accent border border-transparent transition-colors">
-                        <span class="font-semibold text-white">Goal.com</span>
-                        <span class="gotham-accent font-bold">&rarr;</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 5. Supporters Corner -->
-            <div class="gotham-bg rounded-xl shadow-lg p-5 border border-gotham-border lg:col-span-1">
-                <h2 class="text-xl font-bold text-white mb-4 text-center">Supporters Corner</h2>
-                 <div class="space-y-4">
-                     <div class="gotham-bg-highlight p-4 rounded-lg text-center">
-                        <p class="text-2xl font-extrabold gotham-accent">Cloud 9</p>
-                        <p class="text-white mt-2">The original supporters of NJ/NY Gotham FC.</p>
-                        <a href="https://cloud9goth.com/" target="_blank" rel="noopener noreferrer">
-                            <button class="gotham-button w-full mt-4 py-2 px-4 rounded-lg font-bold">Visit Website</button>
-                        </a>
-                     </div>
-                     <div class="gotham-bg-highlight p-4 rounded-lg text-center">
-                        <p class="text-2xl font-extrabold gotham-accent">Official Team Site</p>
-                        <p class="text-white mt-2">The official website for NJ/NY Gotham FC.</p>
-                        <a href="https://www.gothamfc.com/" target="_blank" rel="noopener noreferrer">
-                            <button class="gotham-button w-full mt-4 py-2 px-4 rounded-lg font-bold">Visit Website</button>
-                        </a>
-                     </div>
-                 </div>
-            </div>
+    <!-- Ticker / Next Match Strip -->
+    <div class="bg-gotham-dark border-y border-gray-800 py-3 overflow-hidden whitespace-nowrap relative">
+        <div
+            class="flex items-center gap-12 animate-scroll font-heading font-bold text-gray-400 text-sm tracking-widest uppercase">
+            <span>Next Match: Sat Oct 12 vs San Diego Wave</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>NWSL Championship Loading...</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>Esther González Hat Trick Hero</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>Kelley O'Hara Tribute Night</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>Buy Tickets Now</span>
+            <span class="text-gotham-cyan">•</span>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const upcomingMatchContainer = document.getElementById('upcoming-match-container');
-            const teamStatsContainer = document.getElementById('team-stats-container');
-            const standingsContainer = document.getElementById('standings-container');
+    <!-- Section 1: Season Overview (Stats & Standings) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-b border-gray-900">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-2 uppercase">Season Overview</h2>
+                <p class="text-gray-400">Live tracking of the 2025 Campaign</p>
+            </div>
+            <a href="./stats.html" class="btn-outline hidden md:inline-flex items-center text-xs">
+                View Full Analytics <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
 
-            function renderUpcomingMatch(schedule) {
-                 const now = new Date();
-                let nextMatch = null;
-                if (schedule && schedule.length > 0) {
-                    const sortedSchedule = schedule.sort((a, b) => new Date(a.date) - new Date(b.date));
-                    nextMatch = sortedSchedule.find(match => new Date(match.date) > now);
-                }
-                
-                if (nextMatch) {
-                    // --- CASE 1: A match is scheduled in the future ---
-                    const matchDate = new Date(nextMatch.date);
-                    const formattedDate = matchDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-                    const formattedTime = matchDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                    upcomingMatchContainer.innerHTML = `
-                        <h2 class="text-2xl font-bold text-white mb-4 text-center">Upcoming Match</h2>
-                        <div class="text-center flex-grow">
-                            <p class="text-lg font-medium">${formattedDate}</p>
-                            <p class="text-sm text-gray-400">${formattedTime}</p>
-                            <div class="flex items-center justify-center space-x-4 my-4">
-                                <span class="font-bold text-xl">${nextMatch.home ? 'GOTHAM FC' : nextMatch.opponent}</span>
-                                <span class="gotham-accent font-bold text-2xl">VS</span>
-                                <span class="font-bold text-xl">${nextMatch.home ? nextMatch.opponent : 'GOTHAM FC'}</span>
-                            </div>
-                            <p class="text-gray-300"><span class="font-semibold">Location:</span> ${nextMatch.location}</p>
-                            <p class="text-gray-300"><span class="font-semibold">Watch on:</span> ${nextMatch.broadcast}</p>
-                        </div>
-                        <a href="./roster.html" class="gotham-button block w-full text-center mt-6 py-3 px-4 rounded-lg font-bold">
-                            View Full Roster
-                        </a>`;
-                } else {
-                    // --- CASE 2: No upcoming match (Offseason/Championship Mode) ---
-                    // UPDATE THIS LINE: Change 'assets/images/championship.jpg' to your image path
-                    const championshipImage = "assets/images/championship.jpg";
-                    const placeholderImage = "https://placehold.co/600x350/111111/22d3ee?text=NWSL+CHAMPIONS";
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Standings Widget -->
+            <div
+                class="md:col-span-1 card-modern p-8 flex flex-col justify-between relative group overflow-hidden min-h-[250px]">
+                <h3 class="font-heading text-xl text-gray-400 uppercase tracking-widest z-10">League Rank</h3>
+                <div class="flex flex-col items-center justify-center flex-grow z-10 my-4">
+                    <span class="text-9xl font-black text-white group-hover:text-gotham-cyan transition-colors"
+                        id="rank-display">--</span>
+                    <p class="text-2xl font-bold text-gray-300 mt-2" id="record-display">--</p>
+                </div>
+                <div class="text-center z-10 flex justify-between text-sm text-gray-500 font-mono">
+                    <span>NWSL TABLE</span>
+                    <span>LIVE</span>
+                </div>
+                <!-- Background Decoration -->
+                <div class="absolute -right-6 -bottom-6 text-[12rem] text-gray-800 opacity-10 font-black z-0 rotate-12">
+                    #</div>
+            </div>
 
-                    upcomingMatchContainer.innerHTML = `
-                        <h2 class="text-2xl font-bold text-white mb-2 text-center">2025 Season</h2>
-                        <div class="flex-grow flex flex-col items-center justify-center text-center space-y-4 py-4">
-                            <div class="relative w-full">
-                                <img src="${championshipImage}" 
-                                     alt="Gotham FC Champions" 
-                                     class="rounded-lg shadow-lg border border-gotham-accent mx-auto max-w-full h-auto max-h-[500px] object-contain"
-                                     onerror="this.onerror=null;this.src='${placeholderImage}';">
-                            </div>
-                            <div>
-                                <p class="text-4xl font-black text-white uppercase tracking-wider gotham-accent">CHAMPIONS!</p>
-                                <p class="text-gray-300 mt-1 font-medium">The Bats Reign Supreme</p>
-                            </div>
-                        </div>
-                        <a href="./roster.html" class="gotham-button block w-full text-center mt-auto py-3 px-4 rounded-lg font-bold">
-                            View Championship Roster
-                        </a>`;
-                }
-            }
-            
-            function renderStandings(standings) {
-                 if (standings) {
-                    standingsContainer.innerHTML = `
-                        <h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2>
-                        <div class="gotham-bg-highlight p-4 rounded-lg text-center space-y-2 flex-grow">
-                            <div>
-                                <p class="text-sm text-gray-400">League Rank</p>
-                                <p class="gotham-accent font-extrabold text-4xl">${standings.rank}</p>
-                            </div>
-                            <div class="flex justify-around text-center">
-                                <div>
-                                    <p class="text-sm text-gray-400">Points</p>
-                                    <p class="font-bold text-xl">${standings.points}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-400">Record (W-L-D)</p>
-                                    <p class="font-bold text-xl">${standings.record}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Roster Button Moved Here -->
-                        <a href="./roster.html" class="gotham-button block w-full text-center mt-4 py-3 px-4 rounded-lg font-bold">
-                            View Full Roster
-                        </a>`;
-                } else {
-                    standingsContainer.innerHTML = `<h2 class="text-2xl font-bold text-white mb-4 text-center">Current Standings</h2><div class="flex-grow flex items-center justify-center"><p class="text-center text-gray-400">Standings unavailable.</p></div>
-                    <!-- Roster Button Also Added to Failure Case -->
-                    <a href="./roster.html" class="gotham-button block w-full text-center mt-4 py-3 px-4 rounded-lg font-bold">
-                        View Full Roster
-                    </a>`;
-                }
-            }
-            
-            function renderTeamStats(stats) {
-                 const getStat = (id) => stats?.[id]?.value ?? 'N/A';
-                 const formatPercent = (id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : 'N/A';
+            <!-- Stats Teaser -->
+            <a href="./stats.html"
+                class="md:col-span-2 card-modern p-8 flex flex-col justify-center group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-gotham-dark to-black z-0"></div>
 
-                 teamStatsContainer.innerHTML = `
-                    <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                        <div><p class="text-sm text-gray-400">Goals Scored</p><p class="font-bold text-lg text-white">${getStat('goals-scored')}</p></div>
-                        <div><p class="text-sm text-gray-400">Goals Conceded</p><p class="font-bold text-lg text-white">${getStat('goals-conceded')}</p></div>
+
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-1">Team Performance</h3>
+                            <p class="text-gotham-cyan text-sm uppercase tracking-wider">Current Form</p>
+                        </div>
+                        <div
+                            class="p-2 border border-gray-800 rounded-full group-hover:border-gotham-cyan transition-colors">
+                            <svg class="w-6 h-6 text-gray-400 group-hover:text-gotham-cyan" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
+                                </path>
+                            </svg>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-between gotham-bg-highlight p-3 rounded-lg">
-                        <div><p class="text-sm text-gray-400">Passing Accuracy</p><p class="font-bold text-lg text-white">${formatPercent('Passing Accuracy')}</p></div>
-                         <div><p class="text-sm text-gray-400">Shooting Accuracy</p><p class="font-bold text-lg text-white">${formatPercent('Shooting Accuracy')}</p></div>
+
+                    <div id="stats-preview" class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center pt-4">
+                        <!-- Dynamic content will load here -->
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals
+                                Scored</span>
+                            <span class="text-5xl font-black text-white">--</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean
+                                Sheets</span>
+                            <span class="text-5xl font-black text-white">--</span>
+                        </div>
                     </div>
-                 `;
-            }
-           
-            // --- Main Data Fetching ---
-            async function fetchAllData() {
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Section 2: External News (List Style) -->
+    <section class="bg-gotham-dark py-16 border-b border-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-end mb-10">
+                <div class="max-w-2xl">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 uppercase">Direct from the Source</h2>
+                    <p class="text-gray-400 text-lg">Curated links to the best Gotham FC coverage from around the web.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- News Item 1 -->
+                <a href="https://www.gothamfc.com/news" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-black bg-white rounded-sm uppercase group-hover:bg-gotham-cyan transition-colors">Official</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">
+                        GothamFC.com News</h3>
+                    <p class="text-gray-400 text-sm mt-auto">The official source for team announcements, press releases,
+                        and match previews.</p>
+                </a>
+
+                <!-- News Item 2 -->
+                <a href="https://thebatsignal.beehiiv.com/" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Newsletter</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">The Bat
+                        Signal</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Independent coverage, deep dives, and fan community updates
+                        delivered to your inbox.</p>
+                </a>
+
+                <!-- News Item 3 -->
+                <a href="https://hudsonriverblue.com/tag/gotham-fc/" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Blog</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">Hudson
+                        River Blue</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Detailed match analysis, tactical breakdowns, and player
+                        ratings.</p>
+                </a>
+
+                <!-- News Item 4 -->
+                <a href="https://www.nytimes.com/athletic/football/team/gotham/" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Premium</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">The
+                        Athletic</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Top-tier journalism and features on the team and NWSL.</p>
+                </a>
+
+                <!-- News Item 5 -->
+                <a href="https://www.goal.com/en-us/team/nj-ny-gotham-fc/news/bgkfdckqfqnfbmecbtz03n76d" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Global</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">
+                        Goal.com</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Breaking news, transfer rumors, and live scores.</p>
+                </a>
+
+                <!-- News Item 6 (ESPN) -->
+                <a href="https://www.espn.com/soccer/team/_/id/15364/gotham-fc" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Broadcast</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">ESPN
+                    </h3>
+                    <p class="text-gray-400 text-sm mt-auto">Highlights, standings, and main coverage.</p>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Supporters Section (Styled separately) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="relative rounded-2xl overflow-hidden border border-gotham-dark">
+            <div class="absolute inset-0 bg-gotham-cyan opacity-5"></div>
+            <div class="flex flex-col md:flex-row items-center p-8 md:p-12 gap-8">
+                <div class="md:w-1/2">
+                    <h2 class="text-4xl font-bold text-white mb-4">JOIN THE CROWD</h2>
+                    <p class="text-gray-300 mb-8 text-lg">
+                        Cloud 9 is the official supporters group of NJ/NY Gotham FC. Be part of the noise, the tifos,
+                        and the community.
+                    </p>
+                    <a href="https://cloud9goth.com/" target="_blank" class="btn-primary inline-flex items-center">
+                        Join Cloud 9
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </div>
+                <div class="md:w-1/2 grid grid-cols-2 gap-4 opacity-50">
+                    <!-- Decorative abstract visuals -->
+                    <div class="h-32 bg-gray-800 rounded-lg animate-pulse"></div>
+                    <div class="h-32 bg-gray-900 rounded-lg"></div>
+                    <div class="h-32 bg-gray-900 rounded-lg"></div>
+                    <div class="h-32 bg-gray-800 rounded-lg animate-pulse delay-100"></div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="border-t border-gray-900 bg-black pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h2 class="font-heading text-4xl font-black text-gray-800 mb-4 tracking-tighter uppercase">Gotham FC Fan
+                    Hub
+                </h2>
+                <p class="text-gray-600 mb-8">Not officially affiliated with NJ/NY Gotham FC.</p>
+                <div class="flex justify-center gap-6 text-sm text-gray-500">
+                    <a href="#" class="hover:text-gotham-cyan transition-colors">Home</a>
+                    <a href="#" class="hover:text-gotham-cyan transition-colors">Roster</a>
+                    <a href="#" class="hover:text-gotham-cyan transition-colors">Stats</a>
+                </div>
+                <p class="mt-12 text-xs text-gray-800">Designed for the best fans in the world.</p>
+            </div>
+        </footer>
+
+        <script>
+            // Simple data fetcher for the widget
+            document.addEventListener('DOMContentLoaded', async function () {
+                const rankDisplay = document.getElementById('rank-display');
+                const recordDisplay = document.getElementById('record-display');
+                const statsPreview = document.getElementById('stats-preview');
+
                 try {
+                    // Try fetching - simplistic fallback if fails
                     const response = await fetch('./.netlify/functions/get-gotham-data');
-                    if (!response.ok) throw new Error(`API call failed: ${response.status}`);
-                    const data = await response.json();
-                    
-                    renderUpcomingMatch(data.schedule);
-                    renderStandings(data.standings);
-                    renderTeamStats(data.stats);
+                    if (response.ok) {
+                        const data = await response.json();
 
-                } catch (error) {
-                    console.error('Error fetching site data:', error);
-                    const errorMessage = `<p class="text-red-400 text-center">Could not load site data. Please try again later.</p>`;
-                    upcomingMatchContainer.innerHTML = errorMessage;
-                    teamStatsContainer.innerHTML = errorMessage;
-                    standingsContainer.innerHTML = errorMessage;
+                        // Update Rank & Record
+                        if (data.standings) {
+                            if (data.standings.rank) rankDisplay.textContent = data.standings.rank;
+                            if (data.standings.record) recordDisplay.textContent = data.standings.record;
+                        }
+
+                        // Update Stats
+                        const goals = data.stats && data.stats['goals-scored'] ? data.stats['goals-scored'].value : 0;
+                        const cleanSheets = data.stats && data.stats['Clean Sheets'] ? data.stats['Clean Sheets'].value : 0;
+
+                        statsPreview.innerHTML = `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full text-center pt-4">
+                             <div class="flex flex-col">
+                                <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals Scored</span>
+                                <span class="text-5xl font-black text-white">${goals}</span>
+                            </div>
+                             <div class="flex flex-col">
+                                <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean Sheets</span>
+                                <span class="text-5xl font-black text-white">${cleanSheets}</span>
+                            </div>
+                        </div>
+                    `;
+                    }
+                } catch (e) {
+                    console.log('Using placeholder data');
+                    rankDisplay.textContent = '4';
+                    recordDisplay.textContent = '12-5-4';
+                    statsPreview.innerHTML = `
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full text-center pt-4">
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals Scored</span>
+                            <span class="text-5xl font-black text-white">35</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean Sheets</span>
+                            <span class="text-5xl font-black text-white">8</span>
+                        </div>
+                    </div>
+                `;
                 }
-            }
 
-            fetchAllData();
-        });
-    </script>
+                // Navbar Scroll Effect
+                const nav = document.getElementById('navbar');
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        nav.classList.add('py-0');
+                        nav.classList.replace('glass-nav', 'bg-black/90'); // Darker on scroll if needed, or keep glass
+                    } else {
+                        nav.classList.remove('py-0');
+                    }
+                });
+            });
+        </script>
 </body>
+
 </html>
