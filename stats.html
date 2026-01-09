@@ -83,10 +83,20 @@
     </nav>
 
     <!-- Header -->
-    <header class="pt-32 pb-8 px-4 text-center">
+    <header class="pt-32 pb-12 px-4 text-center">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-4xl md:text-6xl font-black text-white mb-2 uppercase">Season Analytics</h1>
-            <p class="text-gray-400 text-lg font-light">Breaking down the 2025 Championship Campaign</p>
+            <p class="text-gray-400 text-lg font-light mb-10">Breaking down the 2025 Championship Campaign</p>
+
+            <!-- Tabs (Moved Here) -->
+            <div class="flex justify-center gap-4">
+                <button id="tab-overall" class="btn-primary px-8 py-3 text-lg"
+                    onclick="switchTab('overall')">Overall</button>
+                <button id="tab-attacking" class="btn-outline px-8 py-3 text-lg"
+                    onclick="switchTab('attacking')">Attack</button>
+                <button id="tab-defending" class="btn-outline px-8 py-3 text-lg"
+                    onclick="switchTab('defending')">Defense</button>
+            </div>
         </div>
     </header>
 
@@ -96,6 +106,22 @@
         <div id="standings-container" class="card-modern p-8 relative overflow-hidden">
             <div class="absolute inset-0 bg-gotham-cyan/5"></div>
             <p class="text-center text-gray-400">Loading standings...</p>
+        </div>
+
+        <!-- Tabbed Stats -->
+        <div class="mt-8 mb-8">
+            <!-- Content Area -->
+            <div class="glass-panel p-8 rounded-2xl min-h-[300px]">
+                <div id="tab-content-overall" class="tab-content animate-fade-in">
+                    <p class="text-center text-gray-500">Loading...</p>
+                </div>
+                <div id="tab-content-attacking" class="tab-content hidden animate-fade-in">
+                    <p class="text-center text-gray-500">Loading...</p>
+                </div>
+                <div id="tab-content-defending" class="tab-content hidden animate-fade-in">
+                    <p class="text-center text-gray-500">Loading...</p>
+                </div>
+            </div>
         </div>
 
         <!-- Charts Grid -->
@@ -111,29 +137,6 @@
                 </h3>
                 <div class="h-64 flex items-center justify-center">
                     <canvas id="homeAwayChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabbed Stats -->
-        <div class="mt-12">
-            <!-- Tabs -->
-            <div class="flex justify-center mb-8 gap-2">
-                <button id="tab-overall" class="btn-primary" onclick="switchTab('overall')">Overall</button>
-                <button id="tab-attacking" class="btn-outline" onclick="switchTab('attacking')">Attack</button>
-                <button id="tab-defending" class="btn-outline" onclick="switchTab('defending')">Defense</button>
-            </div>
-
-            <!-- Content Area -->
-            <div class="glass-panel p-8 rounded-2xl min-h-[300px]">
-                <div id="tab-content-overall" class="tab-content animate-fade-in">
-                    <p class="text-center text-gray-500">Loading...</p>
-                </div>
-                <div id="tab-content-attacking" class="tab-content hidden animate-fade-in">
-                    <p class="text-center text-gray-500">Loading...</p>
-                </div>
-                <div id="tab-content-defending" class="tab-content hidden animate-fade-in">
-                    <p class="text-center text-gray-500">Loading...</p>
                 </div>
             </div>
         </div>
