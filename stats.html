@@ -52,9 +52,34 @@
                         <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary text-xs ml-4">Get
                             Tickets</a>
                     </div>
+                    <div class="-mr-2 flex md:hidden">
+                        <button type="button" id="mobile-menu-btn" class="text-gray-400 hover:text-white p-2"
+                            aria-controls="mobile-menu" aria-expanded="false">
+                            <span class="sr-only">Open main menu</span>
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Mobile Menu -->
+            <div class="hidden md:hidden bg-black/95 backdrop-blur-xl border-b border-gray-800 absolute w-full"
+                id="mobile-menu">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="./index.html"
+                        class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Home</a>
+                    <a href="./roster.html"
+                        class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Roster</a>
+                    <a href="#"
+                        class="text-white block px-3 py-2 rounded-md text-base font-bold uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Stats</a>
+                    <a href="https://www.gothamfc.com/tickets" target="_blank"
+                        class="text-black bg-gotham-cyan block px-3 py-2 rounded-md text-base font-bold uppercase tracking-widest hover:bg-cyan-300 transition-colors mt-4 text-center">Get
+                        Tickets</a>
+                </div>
+            </div>
     </nav>
 
     <!-- Header -->
