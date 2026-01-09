@@ -129,34 +129,38 @@
                     const imageUrl = player.headshot || `https://placehold.co/400x500/111/444?text=${placeholderText}`;
 
                     html += `
-                        <div class="card-modern relative group fade-in-up" style="animation-delay: ${index * 50}ms">
-                            <!-- Image Container -->
-                            <div class="aspect-[4/5] overflow-hidden bg-gray-900 relative">
+                        <div class="card-modern group fade-in-up flex flex-col h-full bg-gotham-dark border border-gray-800" style="animation-delay: ${index * 50}ms">
+                            <!-- Image Container (Top Half) -->
+                            <div class="h-72 overflow-hidden bg-gray-900 relative border-b border-gray-800">
                                 <img src="${imageUrl}" 
                                      alt="${player.name}"
                                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                      onerror="this.src='https://placehold.co/400x500/111/444?text=${placeholderText}'">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                                
-                                <span class="absolute top-4 left-4 font-black text-4xl text-white/10 group-hover:text-gotham-cyan/20 transition-colors">
-                                    ${player.num}
-                                </span>
+                                <!-- Gradient overlay only at very bottom for smooth transition -->
+                                <div class="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-gotham-dark to-transparent"></div>
                             </div>
 
-                            <!-- Content -->
-                            <div class="absolute bottom-0 w-full p-6">
-                                <div class="flex justify-between items-end mb-1">
-                                    <h3 class="text-xl font-bold text-white leading-none uppercase">${player.name}</h3>
-                                    <span class="text-gotham-cyan font-bold text-sm tracking-wider">${player.pos}</span>
+                            <!-- Content (Bottom Half) -->
+                            <div class="p-6 flex-grow flex flex-col relative">
+                                <!-- Big Number -->
+                                <div class="absolute -top-8 right-4 bg-gotham-cyan text-black font-black text-2xl h-12 w-12 flex items-center justify-center rounded-lg shadow-lg transform group-hover:-translate-y-1 transition-transform">
+                                    ${player.num}
                                 </div>
-                                <div class="h-0 group-hover:h-auto overflow-hidden transition-all duration-300">
-                                    <p class="text-gray-400 text-xs mt-2 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity delay-100 duration-300">
-                                        ${player.bio || 'Gotham FC Player'}
-                                    </p>
-                                    ${player.pageUrl ? `
-                                        <a href="${player.pageUrl}" target="_blank" class="inline-block mt-3 text-xs text-white border-b border-gotham-cyan hover:text-gotham-cyan">View Profile &rarr;</a>
-                                    ` : ''}
+
+                                <div class="mt-2 mb-4">
+                                    <span class="text-gotham-cyan font-bold text-xs tracking-widest uppercase block mb-1">${player.pos}</span>
+                                    <h3 class="text-2xl font-black text-white leading-none uppercase tracking-tight">${player.name}</h3>
                                 </div>
+                                
+                                <p class="text-gray-400 text-sm line-clamp-3 mb-4 flex-grow">
+                                    ${player.bio || 'Gotham FC Player'}
+                                </p>
+
+                                ${player.pageUrl ? `
+                                    <a href="${player.pageUrl}" target="_blank" class="inline-flex items-center text-xs font-bold text-white uppercase tracking-wider hover:text-gotham-cyan transition-colors mt-auto">
+                                        View Profile <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    </a>
+                                ` : ''}
                             </div>
                         </div>
                     `;
