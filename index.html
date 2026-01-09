@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gotham FC Team Roster</title>
+    <title>Gotham FC Fan Hub | The Home of the Bats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,11 @@
             theme: {
                 extend: {
                     colors: {
-                        gotham: { black: '#000000', dark: '#0a0a0a', cyan: '#22d3ee' }
+                        gotham: {
+                            black: '#000000',
+                            dark: '#0a0a0a',
+                            cyan: '#22d3ee'
+                        }
                     }
                 }
             }
@@ -27,11 +31,11 @@
 
 <body class="bg-black text-gray-200 antialiased selection:bg-cyan-400 selection:text-black">
 
-    <!-- Fixed Glass Navigation (Reusable) -->
-    <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
+    <!-- Fixed Glass Navigation -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                <a href="./index.html" class="flex-shrink-0 flex items-center gap-3 group cursor-pointer">
+                <div class="flex-shrink-0 flex items-center gap-3 group cursor-pointer">
                     <svg class="h-10 w-10 text-white group-hover:text-gotham-cyan transition-colors"
                         viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="currentColor" />
@@ -42,157 +46,394 @@
                     <span
                         class="font-heading font-bold text-2xl tracking-wide text-white group-hover:text-gotham-cyan transition-colors">FAN
                         HUB</span>
-                </a>
+                </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="./index.html" class="nav-link text-sm tracking-widest uppercase">Home</a>
-                        <a href="#" class="nav-link active text-sm tracking-widest uppercase">Roster</a>
+                        <a href="#" class="nav-link active text-sm tracking-widest uppercase">Home</a>
+                        <a href="./roster.html" class="nav-link text-sm tracking-widest uppercase">Roster</a>
                         <a href="./stats.html" class="nav-link text-sm tracking-widest uppercase">Stats</a>
                         <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary text-xs ml-4">Get
                             Tickets</a>
                     </div>
                 </div>
+                <!-- Mobile menu button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="text-gray-400 hover:text-white p-2" aria-controls="mobile-menu"
+                        aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Page Header -->
-    <header class="relative pt-32 pb-12 px-4 text-center overflow-hidden">
-        <div class="relative z-10">
-            <h1 class="text-5xl md:text-7xl font-black text-white mb-4 animate-scroll slide-in">THE SQUAD</h1>
-            <p class="text-gotham-cyan text-lg font-heading tracking-widest uppercase mb-8">2025 Season Roster</p>
+    <!-- Main Hero Section -->
+    <section class="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <!-- Using a high-quality placeholder that looks like a stadium/match atmosphere -->
+            <img src="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?q=80&w=2500&auto=format&fit=crop"
+                alt="Stadium Atmosphere" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black"></div>
 
-            <!-- Filters -->
-            <div class="flex flex-wrap justify-center gap-4" id="roster-filters">
-                <button class="filter-btn btn-primary" data-filter="all">All</button>
-                <button class="filter-btn btn-outline" data-filter="FW">Forwards</button>
-                <button class="filter-btn btn-outline" data-filter="MF">Midfielders</button>
-                <button class="filter-btn btn-outline" data-filter="DF">Defenders</button>
-                <button class="filter-btn btn-outline" data-filter="GK">Goalkeepers</button>
+        </div>
+
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
+            <p class="text-gotham-cyan font-heading font-bold tracking-[0.2em] text-lg mb-4 fade-in-up">WELCOME TO THE
+                BAT CAVE</p>
+            <h1 class="text-7xl md:text-9xl font-black text-white leading-none mb-6 relative fade-in-up delay-100"
+                style="text-shadow: 0 0 40px rgba(34,211,238,0.2);">
+                GOTHAM<br><span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">REIGNS</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-10 font-light fade-in-up delay-200">
+                The unofficial headquarters for NJ/NY Gotham FC fans. Stats, rosters, and championship glory.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in-up delay-300">
+                <a href="#latest-news" class="btn-primary">Latest News</a>
+                <a href="./roster.html" class="btn-outline">Meet the Squad</a>
             </div>
         </div>
-        <div class="absolute inset-0 bg-gradient-to-b from-gotham-cyan/5 to-transparent pointer-events-none"></div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 pb-20" id="roster-container">
-        <div class="text-center py-20">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gotham-cyan"></div>
-            <p class="mt-4 text-gray-500">Retrieving player data...</p>
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-gray-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3">
+                </path>
+            </svg>
         </div>
-    </main>
+    </section>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const rosterContainer = document.getElementById('roster-container');
-            const filterBtns = document.querySelectorAll('.filter-btn');
-            let currentRoster = [];
+    <!-- Ticker / Next Match Strip -->
+    <div class="bg-gotham-dark border-y border-gray-800 py-3 overflow-hidden whitespace-nowrap relative">
+        <div
+            class="flex items-center gap-12 animate-scroll font-heading font-bold text-gray-400 text-sm tracking-widest uppercase">
+            <span>Next Match: Sat Oct 12 vs San Diego Wave</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>NWSL Championship Loading...</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>Esther González Hat Trick Hero</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>Kelley O'Hara Tribute Night</span>
+            <span class="text-gotham-cyan">•</span>
+            <span>Buy Tickets Now</span>
+            <span class="text-gotham-cyan">•</span>
+        </div>
+    </div>
 
-            // Filter Logic
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // Update Active State
-                    filterBtns.forEach(b => {
-                        b.classList.remove('btn-primary');
-                        b.classList.add('btn-outline');
-                    });
-                    btn.classList.remove('btn-outline');
-                    btn.classList.add('btn-primary');
+    <!-- Section 1: Season Overview (Stats & Standings) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-b border-gray-900">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-2 uppercase">Season Overview</h2>
+                <p class="text-gray-400">Live tracking of the 2025 Campaign</p>
+            </div>
+            <a href="./stats.html" class="btn-outline hidden md:inline-flex items-center text-xs">
+                View Full Analytics <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
 
-                    const filter = btn.dataset.filter;
-                    renderRoster(currentRoster, filter);
-                });
-            });
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Standings Widget -->
+            <div
+                class="md:col-span-1 card-modern p-8 flex flex-col justify-between relative group overflow-hidden min-h-[250px]">
+                <h3 class="font-heading text-xl text-gray-400 uppercase tracking-widest z-10">League Rank</h3>
+                <div class="flex flex-col items-center justify-center flex-grow z-10 my-4">
+                    <span class="text-9xl font-black text-white group-hover:text-gotham-cyan transition-colors"
+                        id="rank-display">--</span>
+                    <p class="text-2xl font-bold text-gray-300 mt-2" id="record-display">--</p>
+                </div>
+                <div class="text-center z-10 flex justify-between text-sm text-gray-500 font-mono">
+                    <span>NWSL TABLE</span>
+                    <span>LIVE</span>
+                </div>
+                <!-- Background Decoration -->
+                <div class="absolute -right-6 -bottom-6 text-[12rem] text-gray-800 opacity-10 font-black z-0 rotate-12">
+                    #</div>
+            </div>
 
-            function renderRoster(roster, filter = 'all') {
-                if (!roster || roster.length === 0) {
-                    rosterContainer.innerHTML = `<p class="text-center text-red-400">Roster data unavailable.</p>`;
-                    return;
-                }
+            <!-- Stats Teaser -->
+            <a href="./stats.html"
+                class="md:col-span-2 card-modern p-8 flex flex-col justify-center group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-gotham-dark to-black z-0"></div>
 
-                const filteredRoster = filter === 'all'
-                    ? roster
-                    : roster.filter(p => p.pos === filter);
 
-                if (filteredRoster.length === 0) {
-                    rosterContainer.innerHTML = `<p class="text-center text-gray-400 py-12">No players found for this position.</p>`;
-                    return;
-                }
-
-                // Sort by Number
-                filteredRoster.sort((a, b) => (parseInt(a.num) || 99) - (parseInt(b.num) || 99));
-
-                let html = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">`;
-
-                filteredRoster.forEach((player, index) => {
-                    const placeholderText = player.name.split(' ').map(n => n[0]).join('');
-                    const imageUrl = player.headshot || `https://placehold.co/400x500/111/444?text=${placeholderText}`;
-
-                    html += `
-                        <div class="card-modern relative group fade-in-up" style="animation-delay: ${index * 50}ms">
-                            <!-- Image Container -->
-                            <div class="aspect-[4/5] overflow-hidden bg-gray-900 relative">
-                                <img src="${imageUrl}" 
-                                     alt="${player.name}"
-                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                     onerror="this.src='https://placehold.co/400x500/111/444?text=${placeholderText}'">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                                
-                                <span class="absolute top-4 left-4 font-black text-4xl text-white/10 group-hover:text-gotham-cyan/20 transition-colors">
-                                    ${player.num}
-                                </span>
-                            </div>
-
-                            <!-- Content -->
-                            <div class="absolute bottom-0 w-full p-6">
-                                <div class="flex justify-between items-end mb-1">
-                                    <h3 class="text-xl font-bold text-white leading-none uppercase">${player.name}</h3>
-                                    <span class="text-gotham-cyan font-bold text-sm tracking-wider">${player.pos}</span>
-                                </div>
-                                <div class="h-0 group-hover:h-auto overflow-hidden transition-all duration-300">
-                                    <p class="text-gray-400 text-xs mt-2 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity delay-100 duration-300">
-                                        ${player.bio || 'Gotham FC Player'}
-                                    </p>
-                                    ${player.pageUrl ? `
-                                        <a href="${player.pageUrl}" target="_blank" class="inline-block mt-3 text-xs text-white border-b border-gotham-cyan hover:text-gotham-cyan">View Profile &rarr;</a>
-                                    ` : ''}
-                                </div>
-                            </div>
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-1">Team Performance</h3>
+                            <p class="text-gotham-cyan text-sm uppercase tracking-wider">Current Form</p>
                         </div>
-                    `;
-                });
+                        <div
+                            class="p-2 border border-gray-800 rounded-full group-hover:border-gotham-cyan transition-colors">
+                            <svg class="w-6 h-6 text-gray-400 group-hover:text-gotham-cyan" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
 
-                html += `</div>`;
-                rosterContainer.innerHTML = html;
-            }
+                    <div id="stats-preview" class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-center pt-4">
+                        <!-- Dynamic content will load here -->
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals
+                                Scored</span>
+                            <span class="text-5xl font-black text-white">--</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean
+                                Sheets</span>
+                            <span class="text-5xl font-black text-white">--</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
 
-            async function fetchAndDisplayRoster() {
+    <!-- Section 2: External News (List Style) -->
+    <section class="bg-gotham-dark py-16 border-b border-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-end mb-10">
+                <div class="max-w-2xl">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 uppercase">Direct from the Source</h2>
+                    <p class="text-gray-400 text-lg">Curated links to the best Gotham FC coverage from around the web.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- News Item 1 -->
+                <a href="https://www.gothamfc.com/news" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-black bg-white rounded-sm uppercase group-hover:bg-gotham-cyan transition-colors">Official</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">
+                        GothamFC.com News</h3>
+                    <p class="text-gray-400 text-sm mt-auto">The official source for team announcements, press releases,
+                        and match previews.</p>
+                </a>
+
+                <!-- News Item 2 -->
+                <a href="https://thebatsignal.beehiiv.com/" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Newsletter</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">The Bat
+                        Signal</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Independent coverage, deep dives, and fan community updates
+                        delivered to your inbox.</p>
+                </a>
+
+                <!-- News Item 3 -->
+                <a href="https://hudsonriverblue.com/tag/gotham-fc/" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Blog</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">Hudson
+                        River Blue</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Detailed match analysis, tactical breakdowns, and player
+                        ratings.</p>
+                </a>
+
+                <!-- News Item 4 -->
+                <a href="https://www.nytimes.com/athletic/football/team/gotham/" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Premium</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">The
+                        Athletic</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Top-tier journalism and features on the team and NWSL.</p>
+                </a>
+
+                <!-- News Item 5 -->
+                <a href="https://www.goal.com/en-us/team/nj-ny-gotham-fc/news/bgkfdckqfqnfbmecbtz03n76d" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Global</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">
+                        Goal.com</h3>
+                    <p class="text-gray-400 text-sm mt-auto">Breaking news, transfer rumors, and live scores.</p>
+                </a>
+
+                <!-- News Item 6 (ESPN) -->
+                <a href="https://www.espn.com/soccer/team/_/id/15364/gotham-fc" target="_blank"
+                    class="card-modern group p-6 flex flex-col h-full hover:bg-black/50 transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <span
+                            class="px-3 py-1 text-xs font-bold text-white border border-gray-600 rounded-sm uppercase">Broadcast</span>
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-gotham-cyan transition-colors">ESPN
+                    </h3>
+                    <p class="text-gray-400 text-sm mt-auto">Highlights, standings, and main coverage.</p>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Supporters Section (Styled separately) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="relative rounded-2xl overflow-hidden border border-gotham-dark">
+            <div class="absolute inset-0 bg-gotham-cyan opacity-5"></div>
+            <div class="flex flex-col md:flex-row items-center p-8 md:p-12 gap-8">
+                <div class="md:w-1/2">
+                    <h2 class="text-4xl font-bold text-white mb-4">JOIN THE CROWD</h2>
+                    <p class="text-gray-300 mb-8 text-lg">
+                        Cloud 9 is the official supporters group of NJ/NY Gotham FC. Be part of the noise, the tifos,
+                        and the community.
+                    </p>
+                    <a href="https://cloud9goth.com/" target="_blank" class="btn-primary inline-flex items-center">
+                        Join Cloud 9
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </div>
+                <div class="md:w-1/2 grid grid-cols-2 gap-4 opacity-50">
+                    <!-- Decorative abstract visuals -->
+                    <div class="h-32 bg-gray-800 rounded-lg animate-pulse"></div>
+                    <div class="h-32 bg-gray-900 rounded-lg"></div>
+                    <div class="h-32 bg-gray-900 rounded-lg"></div>
+                    <div class="h-32 bg-gray-800 rounded-lg animate-pulse delay-100"></div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="border-t border-gray-900 bg-black pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h2 class="font-heading text-4xl font-black text-gray-800 mb-4 tracking-tighter uppercase">Gotham FC Fan
+                    Hub
+                </h2>
+                <p class="text-gray-600 mb-8">Not officially affiliated with NJ/NY Gotham FC.</p>
+                <div class="flex justify-center gap-6 text-sm text-gray-500">
+                    <a href="#" class="hover:text-gotham-cyan transition-colors">Home</a>
+                    <a href="#" class="hover:text-gotham-cyan transition-colors">Roster</a>
+                    <a href="#" class="hover:text-gotham-cyan transition-colors">Stats</a>
+                </div>
+                <p class="mt-12 text-xs text-gray-800">Designed for the best fans in the world.</p>
+            </div>
+        </footer>
+
+        <script>
+            // Simple data fetcher for the widget
+            document.addEventListener('DOMContentLoaded', async function () {
+                const rankDisplay = document.getElementById('rank-display');
+                const recordDisplay = document.getElementById('record-display');
+                const statsPreview = document.getElementById('stats-preview');
+
                 try {
+                    // Try fetching - simplistic fallback if fails
                     const response = await fetch('./.netlify/functions/get-gotham-data');
                     if (response.ok) {
                         const data = await response.json();
-                        currentRoster = data.roster;
-                        renderRoster(currentRoster);
-                    } else {
-                        throw new Error('API Error');
-                    }
-                } catch (error) {
-                    console.error(error);
-                    // Mock Data for Fallback Preview
-                    currentRoster = [
-                        { name: 'Lynn Williams', num: '10', pos: 'FW', bio: 'USWNT legend and goal scorer.', headshot: 'https://images.unsplash.com/photo-1544698310-74ea9d188c1b?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Crystal Dunn', num: '19', pos: 'MF', bio: 'Versatile playmaker.', headshot: 'https://images.unsplash.com/photo-1577416412292-76188f30d07e?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Kelley O\'Hara', num: '5', pos: 'DF', bio: 'Champion mentality.', headshot: 'https://images.unsplash.com/photo-1628891435252-c247ae2e8587?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Ann-Katrin Berger', num: '30', pos: 'GK', bio: 'Olympic Hero.', headshot: 'https://images.unsplash.com/photo-1628891892233-080c59235069?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Tierna Davidson', num: '2', pos: 'DF', bio: 'Solid defensive anchor.', headshot: '' },
-                    ];
-                    renderRoster(currentRoster);
-                }
-            }
 
-            fetchAndDisplayRoster();
-        });
-    </script>
+                        // Update Rank & Record
+                        if (data.standings) {
+                            if (data.standings.rank) rankDisplay.textContent = data.standings.rank;
+                            if (data.standings.record) recordDisplay.textContent = data.standings.record;
+                        }
+
+                        // Update Stats
+                        const goals = data.stats && data.stats['goals-scored'] ? data.stats['goals-scored'].value : 0;
+                        const cleanSheets = data.stats && data.stats['Clean Sheets'] ? data.stats['Clean Sheets'].value : 0;
+
+                        statsPreview.innerHTML = `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full text-center pt-4">
+                             <div class="flex flex-col">
+                                <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals Scored</span>
+                                <span class="text-5xl font-black text-white">${goals}</span>
+                            </div>
+                             <div class="flex flex-col">
+                                <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean Sheets</span>
+                                <span class="text-5xl font-black text-white">${cleanSheets}</span>
+                            </div>
+                        </div>
+                    `;
+                    }
+                } catch (e) {
+                    console.log('Using placeholder data');
+                    rankDisplay.textContent = '4';
+                    recordDisplay.textContent = '12-5-4';
+                    statsPreview.innerHTML = `
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full text-center pt-4">
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals Scored</span>
+                            <span class="text-5xl font-black text-white">35</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean Sheets</span>
+                            <span class="text-5xl font-black text-white">8</span>
+                        </div>
+                    </div>
+                `;
+                }
+
+                // Navbar Scroll Effect
+                const nav = document.getElementById('navbar');
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        nav.classList.add('py-0');
+                        nav.classList.replace('glass-nav', 'bg-black/90'); // Darker on scroll if needed, or keep glass
+                    } else {
+                        nav.classList.remove('py-0');
+                    }
+                });
+            });
+        </script>
 </body>
 
 </html>
