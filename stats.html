@@ -102,12 +102,6 @@
 
     <main class="max-w-7xl mx-auto px-4 pb-20 space-y-8" id="stats-page-container">
 
-        <!-- Standings Banner -->
-        <div id="standings-container" class="card-modern p-8 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gotham-cyan/5"></div>
-            <p class="text-center text-gray-400">Loading standings...</p>
-        </div>
-
         <!-- Tabbed Stats -->
         <div class="mt-8 mb-8">
             <!-- Content Area -->
@@ -122,6 +116,12 @@
                     <p class="text-center text-gray-500">Loading...</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Standings Banner -->
+        <div id="standings-container" class="card-modern p-8 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gotham-cyan/5"></div>
+            <p class="text-center text-gray-400">Loading standings...</p>
         </div>
 
         <!-- Charts Grid -->
@@ -145,9 +145,111 @@
     </main>
 
     <script>
-        // Global for SwitchTab access
+        let currentData = null;
+        let activeChart1 = null;
+        let activeChart2 = null;
+
+        // --- CHART CONFIGS ---
+        const ChartConfigs = {
+            overall: {
+                chart1: (stats) => ({
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Inside Box', 'Outside Box', 'Headed'],
+                        datasets: [{
+                            data: [getStat(stats, 'Goals from Inside Box'), getStat(stats, 'Goals from Outside Box'), getStat(stats, 'Headed Goals')],
+                            backgroundColor: ['#22d3ee', '#ffffff', '#333333'],
+                            borderWidth: 0
+                        }]
+                    },
+                    label: 'Goal Distribution'
+                }),
+                chart2: (stats) => ({
+                    type: 'bar',
+                    data: {
+                        labels: ['W', 'D', 'L'],
+                        datasets: [
+                            { label: 'Home', data: [getStat(stats, 'home-wins'), getStat(stats, 'home-draws'), getStat(stats, 'home-losses')], backgroundColor: '#22d3ee', borderRadius: 4 },
+                            { label: 'Away', data: [getStat(stats, 'away-wins'), getStat(stats, 'away-draws'), getStat(stats, 'away-losses')], backgroundColor: '#ffffff', borderRadius: 4 }
+                        ]
+                    },
+                    label: 'Performance by Venue'
+                })
+            },
+            attacking: {
+                chart1: (stats) => ({
+                    type: 'pie',
+                    data: {
+                        labels: ['On Target', 'Off Target', 'Blocked'],
+                        datasets: [{
+                            data: [getStat(stats, 'Shots on Target'), getStat(stats, 'Shots off Target'), getStat(stats, 'Blocked Shots')],
+                            backgroundColor: ['#22d3ee', '#333333', '#ffffff'],
+                            borderWidth: 0
+                        }]
+                    },
+                    label: 'Shot Accuracy'
+                }),
+                chart2: (stats) => ({
+                    type: 'bar',
+                    data: {
+                        labels: ['Goals', 'Assists'],
+                        datasets: [{
+                            label: 'Total',
+                            data: [getStat(stats, 'goals-scored'), getStat(stats, 'Goal Assists')],
+                            backgroundColor: ['#22d3ee', '#ffffff'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: { indexAxis: 'y' },
+                    label: 'Goal Contributions'
+                })
+            },
+            defending: {
+                chart1: (stats) => ({
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Tackles Won', 'Lost'],
+                        datasets: [{
+                            data: [getStat(stats, 'Tackles Won'), getStat(stats, 'Tackles Lost')],
+                            backgroundColor: ['#22d3ee', '#333333'],
+                            borderWidth: 0
+                        }]
+                    },
+                    label: 'Tackle Success Rate'
+                }),
+                chart2: (stats) => ({
+                    type: 'bar',
+                    data: {
+                        labels: ['Clearances', 'Interceptions', 'Blocks'],
+                        datasets: [{
+                            label: 'Actions',
+                            data: [getStat(stats, 'Total Clearances'), getStat(stats, 'Interceptions'), getStat(stats, 'Blocks')],
+                            backgroundColor: '#ffffff',
+                            borderRadius: 4
+                        }]
+                    },
+                    label: 'Defensive Actions'
+                })
+            }
+        };
+
+        // --- HELPERS ---
+        const getStat = (stats, id) => stats?.[id]?.value ?? 0;
+        const getStatDisplay = (stats, id) => stats?.[id]?.value ?? '-';
+        const formatPercent = (stats, id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : '-';
+
+        const buildStatItem = (label, value) => `
+            <div class="text-center p-4 border border-gray-800 rounded-lg hover:border-gotham-cyan/50 transition-colors bg-black/40">
+                <p class="text-gray-400 text-xs uppercase tracking-wider mb-1 opacity-70">${label}</p>
+                <p class="text-3xl font-black text-white">${value}</p>
+            </div>
+        `;
+
+        // Switch Tab Function
         function switchTab(tabName) {
-            // Update Buttons
+            if (!currentData) return;
+
+            // 1. Update Buttons
             ['overall', 'attacking', 'defending'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
                 if (t === tabName) {
@@ -157,161 +259,212 @@
                 }
             });
 
-            // Update Content
+            // 2. Update Content Visibility
             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
             const activeContent = document.getElementById(`tab-content-${tabName}`);
             activeContent.classList.remove('hidden');
-
-            // Simple fade reset
             activeContent.classList.remove('animate-fade-in');
-            void activeContent.offsetWidth; // trigger reflow
+            void activeContent.offsetWidth;
             activeContent.classList.add('animate-fade-in');
+
+            // 3. Update Banner (Contextual)
+            updateBanner(tabName);
+
+            // 4. Update Charts
+            updateCharts(tabName);
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const standingsContainer = document.getElementById('standings-container');
-            const tabOverall = document.getElementById('tab-content-overall');
-            const tabAttacking = document.getElementById('tab-content-attacking');
-            const tabDefending = document.getElementById('tab-content-defending');
+        function updateBanner(tabName) {
+            const container = document.getElementById('standings-container');
+            const { standings, stats } = currentData;
 
-            // Charts
-            const goalChartCtx = document.getElementById('goalTypeChart')?.getContext('2d');
-            const homeAwayChartCtx = document.getElementById('homeAwayChart')?.getContext('2d');
-            let goalChart, homeAwayChart;
+            let html = '';
 
-            // HELPERS
-            const getStat = (stats, id) => stats?.[id]?.value ?? '-';
-            const formatPercent = (stats, id) => typeof stats?.[id]?.value === 'number' ? stats[id].value.toFixed(1) + '%' : '-';
-
-            const buildStatItem = (label, value) => `
-                <div class="text-center p-4 border border-gray-800 rounded-lg hover:border-gotham-cyan/50 transition-colors bg-black/40">
-                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-1 opacity-70">${label}</p>
-                    <p class="text-3xl font-black text-white">${value}</p>
-                </div>
-            `;
-
-            function renderStandings(standings) {
-                if (standings) {
-                    standingsContainer.innerHTML = `
-                        <div class="relative z-10 flex flex-col md:flex-row justify-around items-center gap-8 text-center">
-                            <div>
-                                <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">League Rank</p>
-                                <p class="text-7xl font-black text-white" style="text-shadow: 0 0 30px rgba(34,211,238,0.3)">${standings.rank}</p>
-                            </div>
-                            <div class="h-16 w-px bg-gray-800 hidden md:block"></div>
-                            <div>
-                                <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Total Points</p>
-                                <p class="text-5xl font-bold text-white">${standings.points}</p>
-                            </div>
-                            <div class="h-16 w-px bg-gray-800 hidden md:block"></div>
-                            <div>
-                                <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Record</p>
-                                <p class="text-5xl font-bold text-white">${standings.record}</p>
-                            </div>
+            if (tabName === 'overall') {
+                html = `
+                    <div class="relative z-10 flex flex-col md:flex-row justify-around items-center gap-8 text-center animate-fade-in">
+                        <div>
+                            <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">League Rank</p>
+                            <p class="text-7xl font-black text-white" style="text-shadow: 0 0 30px rgba(34,211,238,0.3)">${standings?.rank ?? '-'}</p>
                         </div>
-                    `;
+                        <div class="h-16 w-px bg-gray-800 hidden md:block"></div>
+                        <div>
+                            <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Total Points</p>
+                            <p class="text-5xl font-bold text-white">${standings?.points ?? '-'}</p>
+                        </div>
+                         <div class="h-16 w-px bg-gray-800 hidden md:block"></div>
+                        <div>
+                            <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Record</p>
+                            <p class="text-5xl font-bold text-white">${standings?.record ?? '-'}</p>
+                        </div>
+                    </div>
+                `;
+            } else if (tabName === 'attacking') {
+                html = `
+                    <div class="relative z-10 flex flex-col md:flex-row justify-around items-center gap-8 text-center animate-fade-in">
+                        <div>
+                            <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Goals Scored</p>
+                            <p class="text-7xl font-black text-gotham-cyan">${getStatDisplay(stats, 'goals-scored')}</p>
+                        </div>
+                        <div class="h-16 w-px bg-gray-800 hidden md:block"></div>
+                        <div>
+                             <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Goals / Match</p>
+                             <p class="text-5xl font-bold text-white">${(getStat(stats, 'goals-scored') / getStat(stats, 'played')).toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+            } else if (tabName === 'defending') {
+                html = `
+                    <div class="relative z-10 flex flex-col md:flex-row justify-around items-center gap-8 text-center animate-fade-in">
+                        <div>
+                            <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Clean Sheets</p>
+                            <p class="text-7xl font-black text-white">${getStatDisplay(stats, 'Clean Sheets')}</p>
+                        </div>
+                        <div class="h-16 w-px bg-gray-800 hidden md:block"></div>
+                        <div>
+                             <p class="text-gray-400 uppercase tracking-widest text-sm mb-2">Goals Conceded</p>
+                             <p class="text-5xl font-bold text-white">${getStatDisplay(stats, 'goals-conceded')}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function updateCharts(tabName) {
+            const config = ChartConfigs[tabName];
+            const stats = currentData.stats;
+
+            // Destroy old charts
+            if (activeChart1) activeChart1.destroy();
+            if (activeChart2) activeChart2.destroy();
+
+            // Render Chart 1
+            const ctx1 = document.getElementById('goalTypeChart').getContext('2d');
+            const conf1 = config.chart1(stats);
+            document.getElementById('chart1-title').textContent = conf1.label;
+
+            activeChart1 = new Chart(ctx1, {
+                type: conf1.type,
+                data: conf1.data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#9ca3af', font: { family: 'Inter' } } } },
+                    ...(conf1.options || {})
                 }
+            });
+
+            // Render Chart 2
+            const ctx2 = document.getElementById('homeAwayChart').getContext('2d');
+            const conf2 = config.chart2(stats);
+            document.getElementById('chart2-title').textContent = conf2.label;
+
+            activeChart2 = new Chart(ctx2, {
+                type: conf2.type,
+                data: conf2.data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: '#333' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    },
+                    plugins: { legend: { labels: { color: '#9ca3af' } } },
+                    ...(conf2.options || {})
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Mobile Menu
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            if (btn && menu) {
+                btn.addEventListener('click', () => {
+                    menu.classList.toggle('hidden');
+                });
             }
 
-            function renderStats(stats) {
-                // --- Overall Tab ---
-                let overallHtml = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
-                overallHtml += buildStatItem('Games Played', getStat(stats, 'played'));
-                overallHtml += buildStatItem('Wins', getStat(stats, 'wins'));
-                overallHtml += buildStatItem('Goal Diff', getStat(stats, 'goals-difference'));
-                overallHtml += buildStatItem('Clean Sheets', getStat(stats, 'Clean Sheets'));
-                overallHtml += '</div>';
-                tabOverall.innerHTML = overallHtml;
+            Chart.defaults.color = '#9ca3af';
+            Chart.defaults.font.family = 'Inter';
 
-                // --- Attacking Tab ---
-                let attackingHtml = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
-                attackingHtml += buildStatItem('Goals', getStat(stats, 'goals-scored'));
-                attackingHtml += buildStatItem('Assists', getStat(stats, 'Goal Assists'));
-                attackingHtml += buildStatItem('Shots', getStat(stats, 'Total Shots'));
-                attackingHtml += buildStatItem('Possession', formatPercent(stats, 'Possession Percentage'));
-                attackingHtml += '</div>';
-                tabAttacking.innerHTML = attackingHtml;
-
-                // --- Defending Tab ---
-                let defendingHtml = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
-                defendingHtml += buildStatItem('Conceded', getStat(stats, 'goals-conceded'));
-                defendingHtml += buildStatItem('Tackles Won', getStat(stats, 'Tackles Won'));
-                defendingHtml += buildStatItem('Interceptions', getStat(stats, 'Interceptions'));
-                defendingHtml += buildStatItem('Clearances', getStat(stats, 'Total Clearances'));
-                defendingHtml += '</div>';
-                tabDefending.innerHTML = defendingHtml;
-
-
-                // --- CHARTS ---
-                Chart.defaults.color = '#9ca3af';
-                Chart.defaults.font.family = 'Inter';
-
-                // Donut
-                if (goalChartCtx) {
-                    const d = [getStat(stats, 'Goals from Inside Box'), getStat(stats, 'Goals from Outside Box'), getStat(stats, 'Headed Goals')];
-                    // Fallback if data missing
-                    if (d.some(x => x === '-')) d.fill(1);
-
-                    new Chart(goalChartCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Inside Box', 'Outside Box', 'Headed'],
-                            datasets: [{
-                                data: d,
-                                backgroundColor: ['#22d3ee', '#ffffff', '#333333'],
-                                borderWidth: 0
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: 'right' } }
-                        }
-                    });
-                }
-
-                // Bar
-                if (homeAwayChartCtx) {
-                    new Chart(homeAwayChartCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['W', 'D', 'L'],
-                            datasets: [
-                                { label: 'Home', data: [getStat(stats, 'home-wins'), getStat(stats, 'home-draws'), getStat(stats, 'home-losses')], backgroundColor: '#22d3ee', borderRadius: 4 },
-                                { label: 'Away', data: [getStat(stats, 'away-wins'), getStat(stats, 'away-draws'), getStat(stats, 'away-losses')], backgroundColor: '#ffffff', borderRadius: 4 }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: { grid: { color: '#333' } },
-                                x: { grid: { display: false } }
-                            }
-                        }
-                    });
-                }
-            }
-
-            // Init
+            // Load Data
             async function load() {
                 try {
                     const response = await fetch('./.netlify/functions/get-gotham-data');
                     if (response.ok) {
-                        const data = await response.json();
-                        renderStandings(data.standings);
-                        renderStats(data.stats);
-                    } else {
-                        throw new Error("Failed");
+                        currentData = await response.json();
+                        renderStatsGrids(currentData.stats);
+                        switchTab('overall');
                     }
                 } catch (e) {
-                    // Fallback Visuals (Empty or Sample)
-                    renderStandings({ rank: 4, points: 55, record: '12-5-4' });
-                    renderStats({}); // will show dashes
+                    console.log('Error loading stats:', e);
+                    // Fallback Mock Data
+                    currentData = {
+                        standings: { rank: 4, points: 41, record: '12-5-4' },
+                        stats: {
+                            'played': { value: 21 },
+                            'wins': { value: 12 },
+                            'goals-difference': { value: 12 },
+                            'Clean Sheets': { value: 8 },
+                            'goals-scored': { value: 35 },
+                            'Goal Assists': { value: 24 },
+                            'Total Shots': { value: 245 },
+                            'Possession Percentage': { value: 52.4 },
+                            'goals-conceded': { value: 23 },
+                            'Tackles Won': { value: 189 },
+                            'Interceptions': { value: 145 },
+                            'Total Clearances': { value: 312 },
+                            'Goals from Inside Box': { value: 28 },
+                            'Goals from Outside Box': { value: 5 },
+                            'Headed Goals': { value: 2 },
+                            'home-wins': { value: 7 }, 'home-draws': { value: 2 }, 'home-losses': { value: 1 },
+                            'away-wins': { value: 5 }, 'away-draws': { value: 3 }, 'away-losses': { value: 3 },
+                            'Shots on Target': { value: 110 }, 'Shots off Target': { value: 90 }, 'Blocked Shots': { value: 45 },
+                            'Tackles Lost': { value: 65 }, 'Blocks': { value: 89 }
+                        }
+                    };
+                    renderStatsGrids(currentData.stats);
+                    switchTab('overall');
                 }
             }
+
             load();
         });
+
+        function renderStatsGrids(stats) {
+            const tabOverall = document.getElementById('tab-content-overall');
+            const tabAttacking = document.getElementById('tab-content-attacking');
+            const tabDefending = document.getElementById('tab-content-defending');
+
+            // Overall
+            let overallHtml = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+            overallHtml += buildStatItem('Games Played', getStatDisplay(stats, 'played'));
+            overallHtml += buildStatItem('Wins', getStatDisplay(stats, 'wins'));
+            overallHtml += buildStatItem('Goal Diff', getStatDisplay(stats, 'goals-difference'));
+            overallHtml += buildStatItem('Clean Sheets', getStatDisplay(stats, 'Clean Sheets'));
+            overallHtml += '</div>';
+            tabOverall.innerHTML = overallHtml;
+
+            // Attacking
+            let attackingHtml = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+            attackingHtml += buildStatItem('Goals', getStatDisplay(stats, 'goals-scored'));
+            attackingHtml += buildStatItem('Assists', getStatDisplay(stats, 'Goal Assists'));
+            attackingHtml += buildStatItem('Shots', getStatDisplay(stats, 'Total Shots'));
+            attackingHtml += buildStatItem('Possession', formatPercent(stats, 'Possession Percentage'));
+            attackingHtml += '</div>';
+            tabAttacking.innerHTML = attackingHtml;
+
+            // Defending
+            let defendingHtml = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+            defendingHtml += buildStatItem('Conceded', getStatDisplay(stats, 'goals-conceded'));
+            defendingHtml += buildStatItem('Tackles Won', getStatDisplay(stats, 'Tackles Won'));
+            defendingHtml += buildStatItem('Interceptions', getStatDisplay(stats, 'Interceptions'));
+            defendingHtml += buildStatItem('Clearances', getStatDisplay(stats, 'Total Clearances'));
+            defendingHtml += '</div>';
+            tabDefending.innerHTML = defendingHtml;
+        }
     </script>
     <style>
         .animate-fade-in {
