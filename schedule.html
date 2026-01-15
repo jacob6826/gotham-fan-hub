@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule | Gotham FC Fan Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/custom-styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gotham: {
+                            black: '#000000',
+                            dark: '#0a0a0a',
+                            cyan: '#22d3ee'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-black text-gray-200 antialiased selection:bg-cyan-400 selection:text-black">
+
+    <!-- Fixed Glass Navigation -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="./index.html" class="flex-shrink-0 flex items-center gap-3 group cursor-pointer">
+                    <svg class="h-10 w-10 text-white group-hover:text-gotham-cyan transition-colors"
+                        viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50 0L95.11 25V75L50 100L4.89 75V25L50 0Z" fill="currentColor" />
+                        <path d="M50 10L86.6 30V70L50 90L13.4 70V30L50 10Z" fill="#000000" />
+                        <text x="50" y="62" font-family="Saira Semi Condensed, sans-serif" font-size="30"
+                            font-weight="800" fill="currentColor" text-anchor="middle">GFC</text>
+                    </svg>
+                    <span
+                        class="font-heading font-bold text-2xl tracking-wide text-white group-hover:text-gotham-cyan transition-colors">FAN
+                        HUB</span>
+                </a>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="./index.html" class="nav-link text-sm tracking-widest uppercase">Home</a>
+                        <a href="./roster.html" class="nav-link text-sm tracking-widest uppercase">Roster</a>
+                        <a href="./schedule.html" class="nav-link active text-sm tracking-widest uppercase">Schedule</a>
+                        <a href="./stats.html" class="nav-link text-sm tracking-widest uppercase">Stats</a>
+                        <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary text-xs ml-4">Get
+                            Tickets</a>
+                    </div>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobile-menu-btn" class="text-gray-400 hover:text-white p-2"
+                        aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden bg-black/95 backdrop-blur-xl border-b border-gray-800 absolute w-full"
+            id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="./index.html"
+                    class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Home</a>
+                <a href="./roster.html"
+                    class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Roster</a>
+                <a href="./schedule.html"
+                    class="text-white block px-3 py-2 rounded-md text-base font-bold uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Schedule</a>
+                <a href="./stats.html"
+                    class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Stats</a>
+                <a href="https://www.gothamfc.com/tickets" target="_blank"
+                    class="text-black bg-gotham-cyan block px-3 py-2 rounded-md text-base font-bold uppercase tracking-widest hover:bg-cyan-300 transition-colors mt-4 text-center">Get
+                    Tickets</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="relative pt-32 pb-12 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-gotham-dark to-black"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <h1 class="text-5xl md:text-7xl font-black text-white italic tracking-tighter uppercase mb-4">
+                2026 Season <span class="text-gotham-cyan">Schedule</span>
+            </h1>
+            <p class="text-xl text-gray-400 max-w-2xl">
+                Follow the Bats on their journey to glory. Dates and times subject to change.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Schedule Grid -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <div id="schedule-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Content -->
+            <div class="col-span-full text-center text-gray-500 py-20 italic">Loading full fixture list...</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-900 bg-black pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="font-heading text-4xl font-black text-gray-800 mb-4 tracking-tighter uppercase">Gotham FC Fan Hub
+            </h2>
+            <p class="text-gray-600 mb-8">Not officially affiliated with NJ/NY Gotham FC.</p>
+            <div class="flex justify-center gap-6 text-sm text-gray-500">
+                <a href="./index.html" class="hover:text-gotham-cyan transition-colors">Home</a>
+                <a href="./roster.html" class="hover:text-gotham-cyan transition-colors">Roster</a>
+                <a href="./stats.html" class="hover:text-gotham-cyan transition-colors">Stats</a>
+            </div>
+            <p class="mt-12 text-xs text-gray-800">Designed for the best fans in the world.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const grid = document.getElementById('schedule-grid');
+
+            // Helper to format date for comparison
+            function parseMatchDate(dateStr) {
+                // "Wed Mar 25" -> needs year. Assuming current/next year context might be tricky without year from scrape
+                // The scrape returns exactly what's on the site.
+                // For sorting/filtering, we rely on the order returned by the scrape/API usually being chronological.
+                return dateStr;
+            }
+
+            try {
+                const response = await fetch('./.netlify/functions/get-gotham-data');
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.schedule && data.schedule.length > 0) {
+                        grid.innerHTML = ''; // Clear loading
+
+                        data.schedule.forEach(match => {
+                            const isHome = match.home;
+                            const location = match.location || (isHome ? 'Red Bull Arena' : 'Away');
+                            const opponent = match.opponent;
+                            const dateStr = match.date;
+                            const timeStr = match.time || 'TBD';
+                            const competition = match.competition || 'NWSL';
+
+                            // Determine past or future (primitive check)
+                            // Ideally our API would return a timestamp. 
+                            // For now we render all.
+
+                            const card = document.createElement('div');
+                            card.className = 'bg-gotham-dark border border-gray-800 p-6 rounded-lg group hover:border-gotham-cyan transition-all duration-300 hover:-translate-y-1';
+                            card.innerHTML = `
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="px-2 py-1 bg-gray-900 text-gotham-cyan font-bold text-xs uppercase tracking-widest rounded">${competition}</span>
+                                    <span class="text-gray-500 text-xs font-mono uppercase truncate max-w-[150px] text-right">${location}</span>
+                                </div>
+                                <div class="mb-6">
+                                    <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">${isHome ? 'Vs' : 'At'}</div>
+                                    <h3 class="text-2xl font-black text-white leading-tight">${opponent}</h3>
+                                </div>
+                                <div class="flex items-end justify-between border-t border-gray-800 pt-4">
+                                    <div class="flex flex-col">
+                                        <div class="flex items-center text-white font-bold mb-1">
+                                            <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            ${dateStr}
+                                        </div>
+                                        <div class="flex items-center text-gray-400 text-sm">
+                                            <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            ${timeStr}
+                                        </div>
+                                    </div>
+                                    <div>
+                                         <a href="https://www.gothamfc.com/tickets" target="_blank" class="block px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-gotham-cyan transition-colors">
+                                            Tickets
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            grid.appendChild(card);
+                        });
+                    } else {
+                        grid.innerHTML = '<div class="col-span-full text-center text-gray-500">No matches found in schedule.</div>';
+                    }
+                } else {
+                    throw new Error('API Error');
+                }
+            } catch (e) {
+                console.error(e);
+                grid.innerHTML = '<div class="col-span-full text-center text-red-400">Unable to load schedule. Please try again later.</div>';
+            }
+
+            // Navbar Scroll Effect
+            const nav = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.add('py-0');
+                    nav.classList.replace('glass-nav', 'bg-black/90');
+                } else {
+                    nav.classList.remove('py-0');
+                }
+            });
+
+            // Mobile Menu Toggle
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+        });
+    </script>
+</body>
+
+</html>
