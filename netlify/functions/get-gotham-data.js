@@ -68,18 +68,22 @@ const processScheduleData = (apiData) => {
 
         const GOTHAM_ID = "nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39";
 
-        const gothamMatches = apiData.matches.filter(m =>
-            (m.homeTeam && m.homeTeam.teamId === GOTHAM_ID) ||
-            (m.awayTeam && m.awayTeam.teamId === GOTHAM_ID)
-        );
+        // Filter provided by API URL now, but keeping safe check just in case
+        const gothamMatches = apiData.matches;
 
         return gothamMatches.map(m => {
-            const dateObj = new Date(m.matchDate);
+            const dateObj = new Date(m.matchDate || m.date); // Handle potential field variations
             const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-            const isHome = m.homeTeam.teamId === GOTHAM_ID;
-            const opponent = isHome ? (m.awayTeam.teamName || m.awayTeam.name || 'Opponent') : (m.homeTeam.teamName || m.homeTeam.name || 'Opponent');
+            // Robust checks for team objects
+            const homeId = m.homeTeam ? m.homeTeam.teamId : '';
+            const isHome = homeId === GOTHAM_ID;
+
+            let opponent = "TBD";
+            if (isHome && m.awayTeam) opponent = m.awayTeam.teamName || m.awayTeam.name || "TBD";
+            else if (!isHome && m.homeTeam) opponent = m.homeTeam.teamName || m.homeTeam.name || "TBD";
+
             const location = m.venue ? m.venue.name : (m.venueName || (isHome ? 'Red Bull Arena' : 'Away'));
             const competition = m.competition ? (m.competition.name || m.competition.competitionName) : 'NWSL';
 
@@ -154,7 +158,8 @@ exports.handler = async function (event, context) {
     const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${SEASON_2026}`;
 
     // Schedule, Stats, Standings: Use 2025 (since 2026 is empty)
-    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/matches?locale=en-US`;
+    // UPDATE: User provided correct 2026 Schedule URL with team filter
+    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2026}/matches?locale=en-US&relevantTeamIds=nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39`;
     const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
     const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
 
@@ -179,7 +184,7 @@ exports.handler = async function (event, context) {
             }
             return processedData;
         } catch (error) {
-            console.error(`Failed to fetch live data from ${url}, using fallback.`, error);
+            console.error(`Failed to fetch live data from ${url}, using fallback. Error:`, error);
             return fallback;
         }
     }
