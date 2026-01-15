@@ -51,6 +51,7 @@
                     <div class="ml-10 flex items-baseline space-x-8">
                         <a href="#" class="nav-link active text-sm tracking-widest uppercase">Home</a>
                         <a href="./roster.html" class="nav-link text-sm tracking-widest uppercase">Roster</a>
+                        <a href="./schedule.html" class="nav-link text-sm tracking-widest uppercase">Schedule</a>
                         <a href="./stats.html" class="nav-link text-sm tracking-widest uppercase">Stats</a>
                         <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary text-xs ml-4">Get
                             Tickets</a>
@@ -79,6 +80,8 @@
                     class="text-white block px-3 py-2 rounded-md text-base font-bold uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Home</a>
                 <a href="./roster.html"
                     class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Roster</a>
+                <a href="./schedule.html"
+                    class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Schedule</a>
                 <a href="./stats.html"
                     class="text-gray-300 block px-3 py-2 rounded-md text-base font-medium uppercase tracking-widest hover:bg-gray-800 hover:text-gotham-cyan transition-colors">Stats</a>
                 <a href="https://www.gothamfc.com/tickets" target="_blank"
@@ -141,6 +144,32 @@
             <span class="text-gotham-cyan">•</span>
         </div>
     </div>
+
+
+    <!-- Section: Next Match -->
+    <section id="next-match-section" class="bg-black py-20 border-b border-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-black text-white mb-2 uppercase italic tracking-tighter">Next
+                        Match</h2>
+                    <p class="text-gray-400">The countdown to kickoff has begun.</p>
+                </div>
+                <a href="./schedule.html" class="hidden md:inline-flex btn-outline mt-4 md:mt-0">View Full 2026
+                    Schedule</a>
+            </div>
+
+            <!-- Single Next Match Card -->
+            <div id="next-match-container" class="w-full">
+                <div class="animate-pulse h-64 bg-gray-900 rounded-2xl w-full"></div>
+            </div>
+
+            <div class="mt-8 md:hidden text-center">
+                <a href="./schedule.html" class="btn-outline w-full justify-center">View Full Schedule</a>
+            </div>
+        </div>
+    </section>
+
 
     <!-- Section 1: Season Overview (Stats & Standings) -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-b border-gray-900">
@@ -451,6 +480,70 @@
                             </div>
                         </div>
                     `;
+
+                        // Update Next Match
+                        if (data.schedule && data.schedule.length > 0) {
+                            const nextMatchContainer = document.getElementById('next-match-container');
+                            if (nextMatchContainer) {
+                                // Assuming the API returns upcoming games or the full season in chronological order.
+                                // We will pick the first match. 
+                                const match = data.schedule[0];
+
+                                const isHome = match.home;
+                                const location = match.location || (isHome ? 'Red Bull Arena' : 'Away');
+                                const opponent = match.opponent;
+                                const dateStr = match.date;
+                                const timeStr = match.time || 'TBD';
+                                const competition = match.competition || 'NWSL';
+
+                                // Render Large Hero Card
+                                nextMatchContainer.innerHTML = `
+                                    <div class="card-modern relative overflow-hidden group p-8 md:p-12 border border-gotham-cyan/20 shadow-[0_0_50px_rgba(34,211,238,0.05)] hover:border-gotham-cyan/50 hover:shadow-[0_0_80px_rgba(34,211,238,0.1)] transition-all duration-500">
+                                        
+                                        <!-- BG Gradient -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-gotham-dark via-black to-gotham-dark z-0"></div>
+                                        <div class="absolute top-0 right-0 p-48 bg-gotham-cyan/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+                                        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+                                            
+                                            <!-- Team 1: Gotham -->
+                                            <div class="flex flex-col items-center md:items-start text-center md:text-left flex-1">
+                                                <span class="text-gotham-cyan/80 font-bold tracking-[0.2em] text-sm uppercase mb-3">Home</span>
+                                                <div class="text-5xl md:text-7xl font-black text-white tracking-tighter shadow-black drop-shadow-lg">GFC</div>
+                                            </div>
+
+                                            <!-- VS / Info -->
+                                            <div class="flex flex-col items-center justify-center shrink-0 w-full md:w-auto">
+                                                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-900/80 px-4 py-1 rounded-full backdrop-blur mb-6 border border-gray-800">
+                                                    ${competition}
+                                                </div>
+                                                <div class="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-700 italic tracking-tighter opacity-90 mb-4 leading-none">VS</div>
+                                                
+                                                <div class="flex flex-col items-center gap-1">
+                                                     <div class="text-2xl text-white font-bold tracking-tight">${dateStr}</div>
+                                                     <div class="text-gotham-cyan font-mono text-lg">${timeStr}</div>
+                                                     <div class="text-gray-500 text-xs uppercase tracking-widest mt-2">${location}</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Team 2: Opponent -->
+                                            <div class="flex flex-col items-center md:items-end text-center md:text-right flex-1">
+                                                <span class="text-gray-500 font-bold tracking-[0.2em] text-sm uppercase mb-3">${isHome ? 'Visitor' : 'Host'}</span>
+                                                <div class="text-4xl md:text-6xl font-black text-white leading-none tracking-tighter break-words max-w-[300px]">${opponent}</div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- CTA -->
+                                        <div class="relative z-10 mt-10 md:mt-12 flex justify-center border-t border-gray-800 pt-8">
+                                            <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary min-w-[200px] text-center">
+                                                Buy Tickets
+                                            </a>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
                     }
                 } catch (e) {
                     console.log('Using placeholder data');
