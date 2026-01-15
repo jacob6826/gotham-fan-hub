@@ -11,16 +11,16 @@ const normalizeName = (name) => {
 
 // Helper function to process the official NWSL roster API data and enrich it with sheet data
 const processNWSLRosterData = (apiData, enrichmentData) => {
-    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) { 
+    if (!apiData || !apiData.players || !Array.isArray(apiData.players)) {
         console.error("Roster API data is missing the 'players' array.");
-        return []; 
+        return [];
     }
     const activePlayers = apiData.players.filter(p => p.playerStatus === 'Active');
-    
+
     return activePlayers.map(player => {
         try {
             if (!player || !player.mediaFirstName || !player.mediaLastName) return null;
-            
+
             const potentialKeys = [
                 normalizeName(player.shirtName),
                 normalizeName(player.shortName),
@@ -37,7 +37,7 @@ const processNWSLRosterData = (apiData, enrichmentData) => {
 
             const position = player.roleLabel.replace('Attacking Midfielder', 'Midfielder').replace('Defensive Midfielder', 'Midfielder');
             const posMap = { 'Goalkeeper': 'GK', 'Defender': 'DF', 'Midfielder': 'MF', 'Forward': 'FW' };
-            
+
             return {
                 name: `${player.mediaFirstName} ${player.mediaLastName}`,
                 pos: posMap[position] || 'N/A',
@@ -46,28 +46,48 @@ const processNWSLRosterData = (apiData, enrichmentData) => {
                 headshot: enriched.headshotUrl || null,
                 pageUrl: enriched.playerPageUrl || null
             };
-        } catch (error) { 
+        } catch (error) {
             console.error("Error processing a single player entry:", player, error);
             return null;
         }
     }).filter(p => p !== null);
 };
 
-// Helper function to process the official NWSL schedule API data
+// Helper to process the NWSL Schedule API data
 const processScheduleData = (apiData) => {
-    if (!apiData || !apiData.matches || !Array.isArray(apiData.matches)) { return []; }
-    const gothamMatches = apiData.matches.filter(match => match.home.shortName === "Gotham FC" || match.away.shortName === "Gotham FC");
-    return gothamMatches.map(match => {
-        const isHomeGame = match.home.shortName === "Gotham FC";
-        const opponent = isHomeGame ? match.away.shortName : match.home.shortName;
-        const broadcasters = match.editorial.broadcasters;
-        const networks = [];
-        if (broadcasters.broadcasterNational1) networks.push(broadcasters.broadcasterNational1.split('|')[0]);
-        if (broadcasters.broadcasterNational2) networks.push(broadcasters.broadcasterNational2.split('|')[0]);
-        if (broadcasters.broadcasterNational3) networks.push(broadcasters.broadcasterNational3.split('|')[0]);
-        const broadcastInfo = networks.length > 0 ? networks.join(', ') : "TBD";
-        return { opponent, date: match.matchDateUtc, location: match.stadiumName, broadcast: broadcastInfo, home: isHomeGame };
-    });
+    try {
+        if (!apiData || !apiData.matches) return [];
+
+        const GOTHAM_ID = "nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39";
+
+        const gothamMatches = apiData.matches.filter(m =>
+            (m.homeTeam && m.homeTeam.teamId === GOTHAM_ID) ||
+            (m.awayTeam && m.awayTeam.teamId === GOTHAM_ID)
+        );
+
+        return gothamMatches.map(m => {
+            const dateObj = new Date(m.matchDate);
+            const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+            const isHome = m.homeTeam.teamId === GOTHAM_ID;
+            const opponent = isHome ? (m.awayTeam.teamName || m.awayTeam.name || 'Opponent') : (m.homeTeam.teamName || m.homeTeam.name || 'Opponent');
+            const location = m.venue ? m.venue.name : (m.venueName || (isHome ? 'Red Bull Arena' : 'Away'));
+            const competition = m.competition ? (m.competition.name || m.competition.competitionName) : 'NWSL';
+
+            return {
+                date: dateStr,
+                time: timeStr,
+                competition: competition,
+                opponent: opponent,
+                location: location,
+                home: isHome
+            };
+        });
+    } catch (e) {
+        console.error("Error processing schedule API:", e);
+        return [];
+    }
 };
 
 // Helper function to process the NWSL GENERAL stats API data
@@ -116,29 +136,33 @@ const parseCsv = (csvString) => {
     });
 };
 
-exports.handler = async function(event, context) {
-    const CURRENT_SEASON_ID = "nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c";
+exports.handler = async function (event, context) {
+    const CURRENT_SEASON_ID = "nwsl::Football_Season::0b6761e4701749f593690c0f338da74c";
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTpJmieTcb-C1k_4NDTLR_XfVUBzSc_GBrWVPAx4bt994junG5YY_S3EtZnS_0j42RwwYSYa4eGBpAq/pub?output=csv';
     const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${CURRENT_SEASON_ID}`;
-    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/matches?locale=en-US&startDate=2025-01-22&endDate=2025-11-28`;
+    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/matches?locale=en-US`;
+
     const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
     const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
 
     const fallbackData = {
         roster: [{ name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany", headshot: null, pageUrl: null }],
-        schedule: [{ opponent: "NC Courage", date: "2025-10-26T17:00:00", location: "WakeMed Soccer Park", broadcast: "NWSL+", home: false }],
+        schedule: [
+            { opponent: "Example Opponent (Fallback)", date: "Date TBD", time: "Time TBD", location: "Location TBD", broadcast: "TBD", home: true }
+        ],
         stats: { "goals-scored": { label: "Goals scored", value: 'N/A' } },
         standings: { rank: 'N/A', points: 'N/A', record: 'N/A' },
     };
-    
+
     async function fetchAndProcess(url, processor, fallback, ...args) {
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, { headers: { 'User-Agent': 'GothamFanHub/1.0' } });
             if (!response.ok) throw new Error(`API call failed: ${response.status}`);
             const data = await response.json();
             const processedData = processor(data, ...args);
+
             if (!processedData || (Array.isArray(processedData) && processedData.length === 0 && Object.keys(processedData).length === 0)) {
-                throw new Error("Processing resulted in empty data.");
+                // throw new Error("Processing resulted in empty data."); // Actually, empty array is valid if no games.
             }
             return processedData;
         } catch (error) {
@@ -158,16 +182,20 @@ exports.handler = async function(event, context) {
 
     const enrichmentData = await fetchCsvData(GOOGLE_SHEET_CSV_URL);
 
-    const [schedule, stats, standings] = await Promise.all([
-        fetchAndProcess(NWSL_SCHEDULE_API_URL, processScheduleData, fallbackData.schedule),
+    // Run parallel fetches
+    const [stats, standings, schedule] = await Promise.all([
         fetchAndProcess(NWSL_STATS_API_URL, processStatsData, fallbackData.stats),
-        fetchAndProcess(NWSL_STANDINGS_API_URL, processStandingsData, fallbackData.standings)
+        fetchAndProcess(NWSL_STANDINGS_API_URL, processStandingsData, fallbackData.standings),
+        fetchAndProcess(NWSL_SCHEDULE_API_URL, processScheduleData, fallbackData.schedule)
     ]);
-    
+
     const roster = await fetchAndProcess(NWSL_ROSTER_API_URL, processNWSLRosterData, fallbackData.roster, enrichmentData);
-    
+
+    // If scraping failed, use fallback
+    const finalSchedule = (schedule && schedule.length > 0) ? schedule : fallbackData.schedule;
+
     return {
         statusCode: 200,
-        body: JSON.stringify({ roster, schedule, stats, standings })
+        body: JSON.stringify({ roster, schedule: finalSchedule, stats, standings })
     };
 };
