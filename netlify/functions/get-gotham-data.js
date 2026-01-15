@@ -3,6 +3,14 @@
 const csv = require('csv-parser');
 const stream = require('stream');
 
+// Polyfill fetch for Node.js environments < 18
+if (!global.fetch) {
+    global.fetch = require('node-fetch');
+    global.Headers = require('node-fetch').Headers;
+    global.Request = require('node-fetch').Request;
+    global.Response = require('node-fetch').Response;
+}
+
 // Helper function to normalize names for more reliable matching
 const normalizeName = (name) => {
     if (!name) return '';
@@ -137,13 +145,18 @@ const parseCsv = (csvString) => {
 };
 
 exports.handler = async function (event, context) {
-    const CURRENT_SEASON_ID = "nwsl::Football_Season::0b6761e4701749f593690c0f338da74c";
-    const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTpJmieTcb-C1k_4NDTLR_XfVUBzSc_GBrWVPAx4bt994junG5YY_S3EtZnS_0j42RwwYSYa4eGBpAq/pub?output=csv';
-    const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${CURRENT_SEASON_ID}`;
-    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/matches?locale=en-US`;
+    const SEASON_2025 = "nwsl::Football_Season::fad050beee834db88fa9f2eb28ce5a5c";
+    const SEASON_2026 = "nwsl::Football_Season::0b6761e4701749f593690c0f338da74c";
 
-    const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
-    const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${CURRENT_SEASON_ID}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
+    const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTpJmieTcb-C1k_4NDTLR_XfVUBzSc_GBrWVPAx4bt994junG5YY_S3EtZnS_0j42RwwYSYa4eGBpAq/pub?output=csv';
+
+    // Roster: Use 2026 as requested
+    const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${SEASON_2026}`;
+
+    // Schedule, Stats, Standings: Use 2025 (since 2026 is empty)
+    const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/matches?locale=en-US`;
+    const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
+    const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
 
     const fallbackData = {
         roster: [{ name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany", headshot: null, pageUrl: null }],
