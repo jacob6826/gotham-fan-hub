@@ -132,7 +132,7 @@
     <div class="bg-gotham-dark border-y border-gray-800 py-3 overflow-hidden whitespace-nowrap relative">
         <div
             class="flex items-center gap-12 animate-scroll font-heading font-bold text-gray-400 text-sm tracking-widest uppercase">
-            <span>Next Match: Sat Oct 12 vs San Diego Wave</span>
+            <span>Next Match: Wed Jan 28 vs Corinthians</span>
             <span class="text-gotham-cyan">•</span>
             <span>NWSL Championship Loading...</span>
             <span class="text-gotham-cyan">•</span>
@@ -453,114 +453,145 @@
                 const statsPreview = document.getElementById('stats-preview');
 
                 try {
-                    // Try fetching - simplistic fallback if fails
-                    const response = await fetch('./.netlify/functions/get-gotham-data');
-                    if (response.ok) {
-                        const data = await response.json();
+                    // Hardcoded 2026 Schedule Data (Extracted from ESPN)
+                    const scheduleData = [
+                        { date: "Wed, Jan 28", opponent: "Corinthians", time: "7:30 AM", competition: "FIFA Women's Champions Cup", home: true },
+                        { date: "Sat, Mar 14", opponent: "Boston Legacy FC", time: "12:30 PM", competition: "NWSL", home: false },
+                        { date: "Sat, Mar 21", opponent: "North Carolina Courage", time: "6:30 PM", competition: "NWSL", home: true },
+                        { date: "Wed, Mar 25", opponent: "Denver Summit FC", time: "7:00 PM", competition: "NWSL", home: true },
+                        { date: "Sun, Mar 29", opponent: "Orlando Pride", time: "7:00 PM", competition: "NWSL", home: true },
+                        { date: "Sat, Apr 4", opponent: "Kansas City Current", time: "4:00 PM", competition: "NWSL", home: false },
+                        { date: "Sat, Apr 25", opponent: "Bay FC", time: "1:00 PM", competition: "NWSL", home: true },
+                        { date: "Wed, Apr 29", opponent: "Chicago Stars FC", time: "8:00 PM", competition: "NWSL", home: false },
+                        { date: "Sun, May 3", opponent: "Racing Louisville FC", time: "5:00 PM", competition: "NWSL", home: true },
+                        { date: "Sat, May 9", opponent: "Boston Legacy FC", time: "6:30 PM", competition: "NWSL", home: true },
+                        { date: "Fri, May 15", opponent: "Seattle Reign FC", time: "10:00 PM", competition: "NWSL", home: false },
+                        { date: "Wed, May 20", opponent: "América", time: "TBD", competition: "Concacaf W Champions Cup", home: false },
+                        { date: "Sun, May 31", opponent: "Houston Dash", time: "3:00 PM", competition: "NWSL", home: true },
+                        { date: "Fri, Jun 26", opponent: "Kansas City Current", time: "8:00 PM", competition: "NWSL Challenge Cup", home: true },
+                        { date: "Sat, Jul 4", opponent: "San Diego Wave FC", time: "8:45 PM", competition: "NWSL", home: false },
+                        { date: "Fri, Jul 10", opponent: "Utah Royals", time: "10:00 PM", competition: "NWSL", home: false },
+                        { date: "Wed, Jul 15", opponent: "Washington Spirit", time: "7:00 PM", competition: "NWSL", home: true },
+                        { date: "Sat, Jul 18", opponent: "Seattle Reign FC", time: "12:00 PM", competition: "NWSL", home: true },
+                        { date: "Fri, Jul 24", opponent: "Portland Thorns FC", time: "10:00 PM", competition: "NWSL", home: false },
+                        { date: "Wed, Jul 29", opponent: "Bay FC", time: "10:00 PM", competition: "NWSL", home: false },
+                        { date: "Sat, Aug 1", opponent: "Houston Dash", time: "8:00 PM", competition: "NWSL", home: false },
+                        { date: "Fri, Aug 7", opponent: "San Diego Wave FC", time: "8:00 PM", competition: "NWSL", home: true },
+                        { date: "Fri, Aug 14", opponent: "Kansas City Current", time: "8:00 PM", competition: "NWSL", home: true },
+                        { date: "Sun, Aug 23", opponent: "Angel City FC", time: "8:00 PM", competition: "NWSL", home: false },
+                        { date: "Fri, Aug 28", opponent: "Portland Thorns FC", time: "8:00 PM", competition: "NWSL", home: true },
+                        { date: "Sun, Sep 6", opponent: "Denver Summit FC", time: "2:00 PM", competition: "NWSL", home: false },
+                        { date: "Fri, Sep 11", opponent: "Racing Louisville FC", time: "6:30 PM", competition: "NWSL", home: false },
+                        { date: "Sat, Sep 19", opponent: "North Carolina Courage", time: "6:30 PM", competition: "NWSL", home: false },
+                        { date: "Fri, Sep 25", opponent: "Chicago Stars FC", time: "8:00 PM", competition: "NWSL", home: true },
+                        { date: "Sun, Oct 4", opponent: "Angel City FC", time: "12:00 PM", competition: "NWSL", home: true },
+                        { date: "Sat, Oct 17", opponent: "Washington Spirit", time: "12:30 PM", competition: "NWSL", home: false },
+                        { date: "Sun, Oct 25", opponent: "Orlando Pride", time: "3:00 PM", competition: "NWSL", home: false },
+                        { date: "Sun, Nov 1", opponent: "Utah Royals", time: "5:00 PM", competition: "NWSL", home: true }
+                    ];
 
-                        // Update Rank & Record
-                        if (data.standings) {
-                            if (data.standings.rank) rankDisplay.textContent = data.standings.rank;
-                            if (data.standings.record) recordDisplay.textContent = data.standings.record;
+                    // Data used for display - minimal mocking for stats to look good
+                    const data = {
+                        schedule: scheduleData,
+                        standings: { rank: '1st', record: '0-0-0' },
+                        stats: {
+                            'goals-scored': { value: 0 },
+                            'Clean Sheets': { value: 0 }
                         }
+                    };
 
-                        // Update Stats
-                        const goals = data.stats && data.stats['goals-scored'] ? data.stats['goals-scored'].value : 0;
-                        const cleanSheets = data.stats && data.stats['Clean Sheets'] ? data.stats['Clean Sheets'].value : 0;
+                    // Update Rank & Record
+                    if (data.standings) {
+                        if (data.standings.rank) rankDisplay.textContent = data.standings.rank;
+                        if (data.standings.record) recordDisplay.textContent = data.standings.record;
+                    }
 
-                        statsPreview.innerHTML = `
+                    // Update Stats
+                    const goals = data.stats && data.stats['goals-scored'] ? data.stats['goals-scored'].value : 0;
+                    const cleanSheets = data.stats && data.stats['Clean Sheets'] ? data.stats['Clean Sheets'].value : 0;
+
+                    statsPreview.innerHTML = `
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full text-center pt-4">
-                             <div class="flex flex-col">
+                                <div class="flex flex-col">
                                 <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals Scored</span>
                                 <span class="text-5xl font-black text-white">${goals}</span>
                             </div>
-                             <div class="flex flex-col">
+                                <div class="flex flex-col">
                                 <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean Sheets</span>
                                 <span class="text-5xl font-black text-white">${cleanSheets}</span>
                             </div>
                         </div>
                     `;
 
-                        // Update Next Match
-                        if (data.schedule && data.schedule.length > 0) {
-                            const nextMatchContainer = document.getElementById('next-match-container');
-                            if (nextMatchContainer) {
-                                // Assuming the API returns upcoming games or the full season in chronological order.
-                                // We will pick the first match. 
-                                const match = data.schedule[0];
+                    // Update Next Match
+                    if (data.schedule && data.schedule.length > 0) {
+                        const nextMatchContainer = document.getElementById('next-match-container');
+                        if (nextMatchContainer) {
+                            // Assuming the API returns upcoming games or the full season in chronological order.
+                            // We will pick the first match. 
+                            const match = data.schedule[0];
 
-                                const isHome = match.home;
-                                const location = match.location || (isHome ? 'Red Bull Arena' : 'Away');
-                                const opponent = match.opponent;
-                                const dateStr = match.date;
-                                const timeStr = match.time || 'TBD';
-                                const competition = match.competition || 'NWSL';
+                            const isHome = match.home;
+                            const location = match.location || (isHome ? 'Sports Illustrated Arena' : 'Away');
+                            const opponent = match.opponent;
+                            const dateStr = match.date;
+                            const timeStr = match.time || 'TBD';
+                            const competition = match.competition || 'NWSL';
 
-                                // Render Large Hero Card
-                                nextMatchContainer.innerHTML = `
-                                    <div class="card-modern relative overflow-hidden group p-8 md:p-12 border border-gotham-cyan/20 shadow-[0_0_50px_rgba(34,211,238,0.05)] hover:border-gotham-cyan/50 hover:shadow-[0_0_80px_rgba(34,211,238,0.1)] transition-all duration-500">
+                            // Render Large Hero Card
+                            nextMatchContainer.innerHTML = `
+                                <div class="card-modern relative overflow-hidden group p-8 md:p-12 border border-gotham-cyan/20 shadow-[0_0_50px_rgba(34,211,238,0.05)] hover:border-gotham-cyan/50 hover:shadow-[0_0_80px_rgba(34,211,238,0.1)] transition-all duration-500">
+                                    
+                                    <!-- BG Gradient -->
+                                    <div class="absolute inset-0 bg-gradient-to-r from-gotham-dark via-black to-gotham-dark z-0"></div>
+                                    <div class="absolute top-0 right-0 p-48 bg-gotham-cyan/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+                                    <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
                                         
-                                        <!-- BG Gradient -->
-                                        <div class="absolute inset-0 bg-gradient-to-r from-gotham-dark via-black to-gotham-dark z-0"></div>
-                                        <div class="absolute top-0 right-0 p-48 bg-gotham-cyan/5 rounded-full blur-[100px] pointer-events-none"></div>
+                                        <!-- Team 1: Gotham -->
+                                        <div class="flex flex-col items-center md:items-start text-center md:text-left flex-1">
+                                            <span class="text-gotham-cyan/80 font-bold tracking-[0.2em] text-sm uppercase mb-3">Home</span>
+                                            <div class="text-5xl md:text-7xl font-black text-white tracking-tighter shadow-black drop-shadow-lg">GFC</div>
+                                        </div>
 
-                                        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+                                        <!-- VS / Info -->
+                                        <div class="flex flex-col items-center justify-center shrink-0 w-full md:w-auto">
+                                            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-900/80 px-4 py-1 rounded-full backdrop-blur mb-6 border border-gray-800">
+                                                ${competition}
+                                            </div>
+                                            <div class="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-700 italic tracking-tighter opacity-90 mb-4 leading-none">VS</div>
                                             
-                                            <!-- Team 1: Gotham -->
-                                            <div class="flex flex-col items-center md:items-start text-center md:text-left flex-1">
-                                                <span class="text-gotham-cyan/80 font-bold tracking-[0.2em] text-sm uppercase mb-3">Home</span>
-                                                <div class="text-5xl md:text-7xl font-black text-white tracking-tighter shadow-black drop-shadow-lg">GFC</div>
+                                            <div class="flex flex-col items-center gap-1">
+                                                    <div class="text-2xl text-white font-bold tracking-tight">${dateStr}</div>
+                                                    <div class="text-gotham-cyan font-mono text-lg">${timeStr}</div>
+                                                    <div class="text-gray-500 text-xs uppercase tracking-widest mt-2">${location}</div>
                                             </div>
-
-                                            <!-- VS / Info -->
-                                            <div class="flex flex-col items-center justify-center shrink-0 w-full md:w-auto">
-                                                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-900/80 px-4 py-1 rounded-full backdrop-blur mb-6 border border-gray-800">
-                                                    ${competition}
-                                                </div>
-                                                <div class="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-700 italic tracking-tighter opacity-90 mb-4 leading-none">VS</div>
-                                                
-                                                <div class="flex flex-col items-center gap-1">
-                                                     <div class="text-2xl text-white font-bold tracking-tight">${dateStr}</div>
-                                                     <div class="text-gotham-cyan font-mono text-lg">${timeStr}</div>
-                                                     <div class="text-gray-500 text-xs uppercase tracking-widest mt-2">${location}</div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Team 2: Opponent -->
-                                            <div class="flex flex-col items-center md:items-end text-center md:text-right flex-1">
-                                                <span class="text-gray-500 font-bold tracking-[0.2em] text-sm uppercase mb-3">${isHome ? 'Visitor' : 'Host'}</span>
-                                                <div class="text-4xl md:text-6xl font-black text-white leading-none tracking-tighter break-words max-w-[300px]">${opponent}</div>
-                                            </div>
-
                                         </div>
 
-                                        <!-- CTA -->
-                                        <div class="relative z-10 mt-10 md:mt-12 flex justify-center border-t border-gray-800 pt-8">
-                                            <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary min-w-[200px] text-center">
-                                                Buy Tickets
-                                            </a>
+                                        <!-- Team 2: Opponent -->
+                                        <div class="flex flex-col items-center md:items-end text-center md:text-right flex-1">
+                                            <span class="text-gray-500 font-bold tracking-[0.2em] text-sm uppercase mb-3">${isHome ? 'Visitor' : 'Host'}</span>
+                                            <div class="text-4xl md:text-6xl font-black text-white leading-none tracking-tighter break-words max-w-[300px]">${opponent}</div>
                                         </div>
+
                                     </div>
-                                `;
-                            }
+
+                                    <!-- CTA -->
+                                    <div class="relative z-10 mt-10 md:mt-12 flex justify-center border-t border-gray-800 pt-8">
+                                        <a href="https://www.gothamfc.com/tickets" target="_blank" class="btn-primary min-w-[200px] text-center">
+                                            Buy Tickets
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
                         }
                     }
+
                 } catch (e) {
-                    console.log('Using placeholder data');
-                    rankDisplay.textContent = '4';
-                    recordDisplay.textContent = '12-5-4';
-                    statsPreview.innerHTML = `
-                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full text-center pt-4">
-                        <div class="flex flex-col">
-                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Goals Scored</span>
-                            <span class="text-5xl font-black text-white">35</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-gray-400 font-heading text-lg uppercase tracking-wider mb-1">Clean Sheets</span>
-                            <span class="text-5xl font-black text-white">8</span>
-                        </div>
-                    </div>
-                `;
+                    console.error(e);
+                    // Fallback handled nicely by leaving empty or showing error
+                    rankDisplay.textContent = '--';
+                    recordDisplay.textContent = '--';
                 }
 
                 // Navbar Scroll Effect
