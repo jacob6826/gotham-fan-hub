@@ -88,7 +88,7 @@
     <header class="relative pt-32 pb-12 px-4 text-center overflow-hidden">
         <div class="relative z-10">
             <h1 class="text-5xl md:text-7xl font-black text-white mb-4 animate-scroll slide-in">THE SQUAD</h1>
-            <p class="text-gotham-cyan text-lg font-heading tracking-widest uppercase mb-8">2026 Season Roster</p>
+            <p class="text-gotham-cyan text-lg font-heading tracking-widest uppercase mb-8">2025 Season Roster</p>
 
             <!-- Filters -->
             <div class="flex flex-wrap justify-center gap-4" id="roster-filters">
@@ -209,14 +209,42 @@
                         throw new Error('API Error');
                     }
                 } catch (error) {
-                    console.error(error);
-                    // Mock Data for Fallback Preview
+                    console.error("API Fetch failed (expected locally), using fallback data:", error);
+
+                    // Smart Fallback: Full 2025 Roster for Local Dev
                     currentRoster = [
-                        { name: 'Lynn Williams', num: '10', pos: 'FW', bio: 'USWNT legend and goal scorer.', headshot: 'https://images.unsplash.com/photo-1544698310-74ea9d188c1b?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Crystal Dunn', num: '19', pos: 'MF', bio: 'Versatile playmaker.', headshot: 'https://images.unsplash.com/photo-1577416412292-76188f30d07e?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Kelley O\'Hara', num: '5', pos: 'DF', bio: 'Champion mentality.', headshot: 'https://images.unsplash.com/photo-1628891435252-c247ae2e8587?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Ann-Katrin Berger', num: '30', pos: 'GK', bio: 'Olympic Hero.', headshot: 'https://images.unsplash.com/photo-1628891892233-080c59235069?auto=format&fit=crop&q=80&w=400' },
-                        { name: 'Tierna Davidson', num: '2', pos: 'DF', bio: 'Solid defensive anchor.', headshot: '' },
+                        // Goalkeepers
+                        { name: 'Ann-Katrin Berger', num: '30', pos: 'GK', bio: 'Olympic Gold Medalist and NWSL Keeper of the Year.', headshot: 'https://images.unsplash.com/photo-1628891892233-080c59235069?auto=format&fit=crop&q=80&w=400' },
+                        { name: 'Shelby Hogan', num: '1', pos: 'GK', bio: 'Reliable shot-stopper providing depth in goal.', headshot: '' },
+                        { name: 'Cassie Miller', num: '38', pos: 'GK', bio: 'Experienced goalkeeper with great distribution.', headshot: '' },
+                        { name: 'Michela Ongaro', num: '99', pos: 'GK', bio: 'Promising talent developing with the squad.', headshot: '' },
+
+                        // Defenders
+                        { name: 'Tierna Davidson', num: '15', pos: 'DF', bio: 'World Cup winner and defensive anchor.', headshot: '' },
+                        { name: 'Emily Sonnett', num: '6', pos: 'DF', bio: 'Versatile defender with championship experience.', headshot: '' },
+                        { name: 'Bruninha', num: '3', pos: 'DF', bio: 'Dynamic Brazilian full-back with attacking flair.', headshot: '' },
+                        { name: 'Jess Carter', num: '27', pos: 'DF', bio: 'Solid English international defender.', headshot: '' },
+                        { name: 'Jenna Nighswonger', num: '5', pos: 'DF', bio: 'Rookie of the Year talent with a deadly left foot.', headshot: '' },
+                        { name: 'Maitane López', num: '8', pos: 'DF', bio: 'Composed Spanish defender and leader.', headshot: '' },
+                        { name: 'Sam Hiatt', num: '21', pos: 'DF', bio: 'Strong center-back with aerial dominance.', headshot: '' },
+                        { name: 'Maycee Bell', num: '42', pos: 'DF', bio: 'Young defender with high potential.', headshot: '' },
+
+                        // Midfielders
+                        { name: 'Rose Lavelle', num: '16', pos: 'MF', bio: 'Creative genius and USWNT star playmaker.', headshot: '' },
+                        { name: 'Yazmeen Ryan', num: '10', pos: 'MF', bio: 'Engine of the midfield with tireless work rate.', headshot: '' },
+                        { name: 'Nealy Martin', num: '14', pos: 'MF', bio: 'Hard-working midfielder who does the dirty work.', headshot: '' },
+                        { name: 'Delanie Sheehan', num: '17', pos: 'MF', bio: 'Technical midfielder with great vision.', headshot: '' },
+                        { name: 'McCall Zerboni', num: '7', pos: 'MF', bio: 'The Captain. Heart and soul of the team.', headshot: '' },
+                        { name: 'Sinead Farrelly', num: '28', pos: 'MF', bio: 'Experienced playmaker with a comeback story.', headshot: '' },
+                        { name: 'Taryn Torres', num: '13', pos: 'MF', bio: 'Technical midfielder returning to top form.', headshot: '' },
+
+                        // Forwards
+                        { name: 'Esther González', num: '9', pos: 'FW', bio: 'World Cup winner and clinical finisher.', headshot: '' },
+                        { name: 'Midge Purce', num: '23', pos: 'FW', bio: 'Electrifying winger with pace and skill.', headshot: 'https://images.unsplash.com/photo-1544698310-74ea9d188c1b?auto=format&fit=crop&q=80&w=400' },
+                        { name: 'Jaedyn Shaw', num: '18', pos: 'FW', bio: 'Rising global superstar and goal machine.', headshot: '' },
+                        { name: 'Katie Stengel', num: '24', pos: 'FW', bio: 'Strong hold-up player and goal poacher.', headshot: '' },
+                        { name: 'Ella Stevens', num: '2', pos: 'FW', bio: 'Breakout forward with a nose for goal.', headshot: '' },
+                        { name: 'Svava Rós Guðmundsdóttir', num: '22', pos: 'FW', bio: 'Dynamic Icelandic forward.', headshot: '' }
                     ];
                     renderRoster(currentRoster);
                 }
@@ -238,4 +266,3 @@
 </body>
 
 </html>
-
