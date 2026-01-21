@@ -142,62 +142,85 @@
             }
 
             try {
-                const response = await fetch('./.netlify/functions/get-gotham-data');
-                if (response.ok) {
-                    const data = await response.json();
+                // Hardcoded 2026 Schedule Data (Extracted from ESPN)
+                const scheduleData = [
+                    { date: "Wed, Jan 28", opponent: "Corinthians", time: "7:30 AM", competition: "FIFA Women's Champions Cup", home: true },
+                    { date: "Sat, Mar 14", opponent: "Boston Legacy FC", time: "12:30 PM", competition: "NWSL", home: false },
+                    { date: "Sat, Mar 21", opponent: "North Carolina Courage", time: "6:30 PM", competition: "NWSL", home: true },
+                    { date: "Wed, Mar 25", opponent: "Denver Summit FC", time: "7:00 PM", competition: "NWSL", home: true },
+                    { date: "Sun, Mar 29", opponent: "Orlando Pride", time: "7:00 PM", competition: "NWSL", home: true },
+                    { date: "Sat, Apr 4", opponent: "Kansas City Current", time: "4:00 PM", competition: "NWSL", home: false },
+                    { date: "Sat, Apr 25", opponent: "Bay FC", time: "1:00 PM", competition: "NWSL", home: true },
+                    { date: "Wed, Apr 29", opponent: "Chicago Stars FC", time: "8:00 PM", competition: "NWSL", home: false },
+                    { date: "Sun, May 3", opponent: "Racing Louisville FC", time: "5:00 PM", competition: "NWSL", home: true },
+                    { date: "Sat, May 9", opponent: "Boston Legacy FC", time: "6:30 PM", competition: "NWSL", home: true },
+                    { date: "Fri, May 15", opponent: "Seattle Reign FC", time: "10:00 PM", competition: "NWSL", home: false },
+                    { date: "Wed, May 20", opponent: "América", time: "TBD", competition: "Concacaf W Champions Cup", home: false },
+                    { date: "Sun, May 31", opponent: "Houston Dash", time: "3:00 PM", competition: "NWSL", home: true },
+                    { date: "Fri, Jun 26", opponent: "Kansas City Current", time: "8:00 PM", competition: "NWSL Challenge Cup", home: true },
+                    { date: "Sat, Jul 4", opponent: "San Diego Wave FC", time: "8:45 PM", competition: "NWSL", home: false },
+                    { date: "Fri, Jul 10", opponent: "Utah Royals", time: "10:00 PM", competition: "NWSL", home: false },
+                    { date: "Wed, Jul 15", opponent: "Washington Spirit", time: "7:00 PM", competition: "NWSL", home: true },
+                    { date: "Sat, Jul 18", opponent: "Seattle Reign FC", time: "12:00 PM", competition: "NWSL", home: true },
+                    { date: "Fri, Jul 24", opponent: "Portland Thorns FC", time: "10:00 PM", competition: "NWSL", home: false },
+                    { date: "Wed, Jul 29", opponent: "Bay FC", time: "10:00 PM", competition: "NWSL", home: false },
+                    { date: "Sat, Aug 1", opponent: "Houston Dash", time: "8:00 PM", competition: "NWSL", home: false },
+                    { date: "Fri, Aug 7", opponent: "San Diego Wave FC", time: "8:00 PM", competition: "NWSL", home: true },
+                    { date: "Fri, Aug 14", opponent: "Kansas City Current", time: "8:00 PM", competition: "NWSL", home: true },
+                    { date: "Sun, Aug 23", opponent: "Angel City FC", time: "8:00 PM", competition: "NWSL", home: false },
+                    { date: "Fri, Aug 28", opponent: "Portland Thorns FC", time: "8:00 PM", competition: "NWSL", home: true },
+                    { date: "Sun, Sep 6", opponent: "Denver Summit FC", time: "2:00 PM", competition: "NWSL", home: false },
+                    { date: "Fri, Sep 11", opponent: "Racing Louisville FC", time: "6:30 PM", competition: "NWSL", home: false },
+                    { date: "Sat, Sep 19", opponent: "North Carolina Courage", time: "6:30 PM", competition: "NWSL", home: false },
+                    { date: "Fri, Sep 25", opponent: "Chicago Stars FC", time: "8:00 PM", competition: "NWSL", home: true },
+                    { date: "Sun, Oct 4", opponent: "Angel City FC", time: "12:00 PM", competition: "NWSL", home: true },
+                    { date: "Sat, Oct 17", opponent: "Washington Spirit", time: "12:30 PM", competition: "NWSL", home: false },
+                    { date: "Sun, Oct 25", opponent: "Orlando Pride", time: "3:00 PM", competition: "NWSL", home: false },
+                    { date: "Sun, Nov 1", opponent: "Utah Royals", time: "5:00 PM", competition: "NWSL", home: true }
+                ];
 
-                    if (data.schedule && data.schedule.length > 0) {
-                        grid.innerHTML = ''; // Clear loading
+                grid.innerHTML = ''; // Clear loading
 
-                        data.schedule.forEach(match => {
-                            const isHome = match.home;
-                            const location = match.location || (isHome ? 'Red Bull Arena' : 'Away');
-                            const opponent = match.opponent;
-                            const dateStr = match.date;
-                            const timeStr = match.time || 'TBD';
-                            const competition = match.competition || 'NWSL';
+                scheduleData.forEach(match => {
+                    const isHome = match.home;
+                    const location = isHome ? 'Sports Illustrated Arena' : 'Away';
+                    const opponent = match.opponent;
+                    const dateStr = match.date;
+                    const timeStr = match.time;
+                    const competition = match.competition;
 
-                            // Determine past or future (primitive check)
-                            // Ideally our API would return a timestamp. 
-                            // For now we render all.
-
-                            const card = document.createElement('div');
-                            card.className = 'bg-gotham-dark border border-gray-800 p-6 rounded-lg group hover:border-gotham-cyan transition-all duration-300 hover:-translate-y-1';
-                            card.innerHTML = `
-                                <div class="flex justify-between items-start mb-4">
-                                    <span class="px-2 py-1 bg-gray-900 text-gotham-cyan font-bold text-xs uppercase tracking-widest rounded">${competition}</span>
-                                    <span class="text-gray-500 text-xs font-mono uppercase truncate max-w-[150px] text-right">${location}</span>
+                    const card = document.createElement('div');
+                    card.className = 'bg-gotham-dark border border-gray-800 p-6 rounded-lg group hover:border-gotham-cyan transition-all duration-300 hover:-translate-y-1';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="px-2 py-1 bg-gray-900 text-gotham-cyan font-bold text-xs uppercase tracking-widest rounded">${competition}</span>
+                            <span class="text-gray-500 text-xs font-mono uppercase truncate max-w-[150px] text-right">${location}</span>
+                        </div>
+                        <div class="mb-6">
+                            <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">${isHome ? 'Vs' : 'At'}</div>
+                            <h3 class="text-2xl font-black text-white leading-tight">${opponent}</h3>
+                        </div>
+                        <div class="flex items-end justify-between border-t border-gray-800 pt-4">
+                            <div class="flex flex-col">
+                                <div class="flex items-center text-white font-bold mb-1">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    ${dateStr}
                                 </div>
-                                <div class="mb-6">
-                                    <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">${isHome ? 'Vs' : 'At'}</div>
-                                    <h3 class="text-2xl font-black text-white leading-tight">${opponent}</h3>
+                                <div class="flex items-center text-gray-400 text-sm">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    ${timeStr}
                                 </div>
-                                <div class="flex items-end justify-between border-t border-gray-800 pt-4">
-                                    <div class="flex flex-col">
-                                        <div class="flex items-center text-white font-bold mb-1">
-                                            <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                            ${dateStr}
-                                        </div>
-                                        <div class="flex items-center text-gray-400 text-sm">
-                                            <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            ${timeStr}
-                                        </div>
-                                    </div>
-                                    <div>
-                                         <a href="https://www.gothamfc.com/tickets" target="_blank" class="block px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-gotham-cyan transition-colors">
-                                            Tickets
-                                        </a>
-                                    </div>
-                                </div>
-                            `;
-                            grid.appendChild(card);
-                        });
-                    } else {
-                        grid.innerHTML = '<div class="col-span-full text-center text-gray-500">No matches found in schedule.</div>';
-                    }
-                } else {
-                    throw new Error('API Error');
-                }
+                            </div>
+                            <div>
+                                    <a href="https://www.gothamfc.com/tickets" target="_blank" class="block px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-gotham-cyan transition-colors">
+                                    Tickets
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
             } catch (e) {
                 console.error(e);
                 grid.innerHTML = '<div class="col-span-full text-center text-red-400">Unable to load schedule. Please try again later.</div>';
