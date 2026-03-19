@@ -142,7 +142,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .animate-scroll {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll-text 20s linear infinite;
+    animation: scroll-text 40s linear infinite;
 }
 
 /* Fade In */
