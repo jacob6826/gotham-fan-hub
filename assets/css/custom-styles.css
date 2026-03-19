@@ -1,150 +1,211 @@
-/* General Body Styles */
+/* --- GOTHAM FAN HUB DESIGN SYSTEM --- */
+:root {
+    /* Brand Colors */
+    --color-primary: #000000;
+    --color-secondary: #0a0a0a;
+    --color-accent: #22d3ee; /* Cyan-400 */
+    --color-accent-dim: rgba(34, 211, 238, 0.1);
+    --color-text-main: #f3f4f6;
+    --color-text-muted: #9ca3af;
+    --color-border: #262626;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 70%, #000000 100%);
+    --gradient-card: linear-gradient(145deg, #111111 0%, #0a0a0a 100%);
+    --gradient-glow: radial-gradient(circle at center, rgba(34,211,238,0.15) 0%, transparent 70%);
+
+    /* Fonts */
+    --font-heading: 'Saira Semi Condensed', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+/* Base Reset */
 body {
-    background-color: #000000; /* Solid black is now the base */
-    font-family: 'Inter', sans-serif;
-    position: relative;
+    background-color: var(--color-primary);
+    color: var(--color-text-main);
+    font-family: var(--font-body);
     overflow-x: hidden;
     min-height: 100vh;
 }
 
-/* NEW: Apply gradient to a fixed pseudo-element for mobile compatibility */
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    /* UPDATED: Gradient now fades to black at 100% instead of 80% */
-    background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.5) 0%, #000000 100%);
-    background-repeat: no-repeat;
-    z-index: -2; /* Place behind the texture */
+/* Typography */
+h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
+/* Glassmorphism Utilities */
+.glass-panel {
+    background: rgba(17, 17, 17, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
 
-/* Background texture pseudo-element */
-body::before {
-    content: "";
-    position: fixed;
+.glass-nav {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+/* --- COMPONENTS --- */
+
+/* Navigation */
+.nav-link {
+    position: relative;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--color-accent);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background-color: var(--color-accent);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    width: 100%;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--color-accent);
+    color: #000;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
+
+.btn-primary:hover {
+    background: #67e8f9; /* brighter cyan */
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background: var(--color-accent-dim);
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+}
+
+/* Cards */
+.card-modern {
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card-modern:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-accent);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Scrolling Text Animation (for breaking news) */
+@keyframes scroll-text {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.animate-scroll {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll-text 20s linear infinite;
+}
+
+/* Fade In */
+.fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #000;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+}
+
+/* Glitch Effect Text (Optional use for big titles) */
+.glitch-text {
+    position: relative;
+}
+.glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
-    /* This assumes you have saved the logo you uploaded
-      to this path in your project: /assets/images/image_1bcd79.png
-    */
-    background-image: url('../images/image_1bcd79.png');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    opacity: 0.03; 
-    z-index: -1; /* Place in front of the gradient, behind content */
+    height: 100%;
 }
-
-/* Apply the title font to all headers */
-h1, h2, h3, .font-title {
-    font-family: 'Saira Semi Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 700;
+.glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
 }
-
-/* --- THEME COLORS --- */
-
-/* Background for main cards and containers */
-.gotham-bg {
-    background-color: #111111;
+.glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 #00fff9;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
 }
-
-/* Background for highlighted elements within cards */
-.gotham-bg-highlight {
-    background-color: #222222;
+@keyframes glitch-anim {
+    0% { clip: rect(2px, 9999px, 5px, 0); }
+    5% { clip: rect(45px, 9999px, 19px, 0); }
+    10% { clip: rect(12px, 9999px, 60px, 0); }
+    /* ... shortened for brevity, just a subtle effect ... */
+    100% { clip: rect(33px, 9999px, 11px, 0); }
 }
-
-/* The primary accent color for text, borders, etc. */
-.gotham-accent {
-    color: #22d3ee;
-}
-
-/* Border color for separating elements */
-.gotham-border {
-    border-color: #333333;
-}
-
-/* Enhanced hover effect for player cards */
-.player-card-link .gotham-bg {
-     /* Make all transitions smooth. 
-       We target the inner div so the whole link doesn't "glow".
-     */
-     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-}
-.player-card-link:hover .gotham-bg {
-    transform: scale(1.05); /* The zoom effect */
-    box-shadow: 0 0 25px rgba(34, 211, 238, 0.4); /* The cyan glow */
-    border-color: #22d3ee; /* Brighten border on hover */
-}
-
-
-/* Primary button styles */
-.gotham-button {
-    background-color: #06b6d4;
-    color: #ffffff;
-    transition: background-color 0.2s;
-    font-family: 'Saira Semi Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-.gotham-button:hover {
-    background-color: #0891b2;
-}
-
-/* Secondary button styles (outline) */
-.gotham-button-secondary {
-    border: 2px solid #06b6d4;
-    color: #22d3ee;
-    transition: background-color 0.2s, color 0.2s;
-    font-family: 'Saira Semi Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-.gotham-button-secondary:hover {
-    background-color: #06b6d4;
-    color: #ffffff;
-}
-
-/* --- NEW: Scroll-in Animation --- */
-.fade-in-item {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-    /* Stagger the animation using a CSS variable */
-    transition-delay: var(--delay, 0s);
-}
-
-.fade-in-item.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-
-/* --- CUSTOM SCROLLBAR --- */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #333333 #111111;
-}
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #111111;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: #333333;
-  border-radius: 10px;
-  border: 2px solid #111111;
-}
-::-webkit-scrollbar-thumb:hover {
-    background-color: #4B5563;
-}
-

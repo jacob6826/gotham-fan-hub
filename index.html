@@ -453,52 +453,9 @@
                 const statsPreview = document.getElementById('stats-preview');
 
                 try {
-                    // Hardcoded 2026 Schedule Data (Extracted from ESPN)
-                    const scheduleData = [
-                        { date: "Wed, Jan 28", opponent: "Corinthians", time: "7:30 AM", competition: "FIFA Women's Champions Cup", home: true },
-                        { date: "Sat, Mar 14", opponent: "Boston Legacy FC", time: "12:30 PM", competition: "NWSL", home: false },
-                        { date: "Sat, Mar 21", opponent: "North Carolina Courage", time: "6:30 PM", competition: "NWSL", home: true },
-                        { date: "Wed, Mar 25", opponent: "Denver Summit FC", time: "7:00 PM", competition: "NWSL", home: true },
-                        { date: "Sun, Mar 29", opponent: "Orlando Pride", time: "7:00 PM", competition: "NWSL", home: true },
-                        { date: "Sat, Apr 4", opponent: "Kansas City Current", time: "4:00 PM", competition: "NWSL", home: false },
-                        { date: "Sat, Apr 25", opponent: "Bay FC", time: "1:00 PM", competition: "NWSL", home: true },
-                        { date: "Wed, Apr 29", opponent: "Chicago Stars FC", time: "8:00 PM", competition: "NWSL", home: false },
-                        { date: "Sun, May 3", opponent: "Racing Louisville FC", time: "5:00 PM", competition: "NWSL", home: true },
-                        { date: "Sat, May 9", opponent: "Boston Legacy FC", time: "6:30 PM", competition: "NWSL", home: true },
-                        { date: "Fri, May 15", opponent: "Seattle Reign FC", time: "10:00 PM", competition: "NWSL", home: false },
-                        { date: "Wed, May 20", opponent: "América", time: "TBD", competition: "Concacaf W Champions Cup", home: false },
-                        { date: "Sun, May 31", opponent: "Houston Dash", time: "3:00 PM", competition: "NWSL", home: true },
-                        { date: "Fri, Jun 26", opponent: "Kansas City Current", time: "8:00 PM", competition: "NWSL Challenge Cup", home: true },
-                        { date: "Sat, Jul 4", opponent: "San Diego Wave FC", time: "8:45 PM", competition: "NWSL", home: false },
-                        { date: "Fri, Jul 10", opponent: "Utah Royals", time: "10:00 PM", competition: "NWSL", home: false },
-                        { date: "Wed, Jul 15", opponent: "Washington Spirit", time: "7:00 PM", competition: "NWSL", home: true },
-                        { date: "Sat, Jul 18", opponent: "Seattle Reign FC", time: "12:00 PM", competition: "NWSL", home: true },
-                        { date: "Fri, Jul 24", opponent: "Portland Thorns FC", time: "10:00 PM", competition: "NWSL", home: false },
-                        { date: "Wed, Jul 29", opponent: "Bay FC", time: "10:00 PM", competition: "NWSL", home: false },
-                        { date: "Sat, Aug 1", opponent: "Houston Dash", time: "8:00 PM", competition: "NWSL", home: false },
-                        { date: "Fri, Aug 7", opponent: "San Diego Wave FC", time: "8:00 PM", competition: "NWSL", home: true },
-                        { date: "Fri, Aug 14", opponent: "Kansas City Current", time: "8:00 PM", competition: "NWSL", home: true },
-                        { date: "Sun, Aug 23", opponent: "Angel City FC", time: "8:00 PM", competition: "NWSL", home: false },
-                        { date: "Fri, Aug 28", opponent: "Portland Thorns FC", time: "8:00 PM", competition: "NWSL", home: true },
-                        { date: "Sun, Sep 6", opponent: "Denver Summit FC", time: "2:00 PM", competition: "NWSL", home: false },
-                        { date: "Fri, Sep 11", opponent: "Racing Louisville FC", time: "6:30 PM", competition: "NWSL", home: false },
-                        { date: "Sat, Sep 19", opponent: "North Carolina Courage", time: "6:30 PM", competition: "NWSL", home: false },
-                        { date: "Fri, Sep 25", opponent: "Chicago Stars FC", time: "8:00 PM", competition: "NWSL", home: true },
-                        { date: "Sun, Oct 4", opponent: "Angel City FC", time: "12:00 PM", competition: "NWSL", home: true },
-                        { date: "Sat, Oct 17", opponent: "Washington Spirit", time: "12:30 PM", competition: "NWSL", home: false },
-                        { date: "Sun, Oct 25", opponent: "Orlando Pride", time: "3:00 PM", competition: "NWSL", home: false },
-                        { date: "Sun, Nov 1", opponent: "Utah Royals", time: "5:00 PM", competition: "NWSL", home: true }
-                    ];
-
-                    // Data used for display - minimal mocking for stats to look good
-                    const data = {
-                        schedule: scheduleData,
-                        standings: { rank: '1st', record: '0-0-0' },
-                        stats: {
-                            'goals-scored': { value: 0 },
-                            'Clean Sheets': { value: 0 }
-                        }
-                    };
+                    const response = await fetch('./.netlify/functions/get-gotham-data');
+                    if (!response.ok) throw new Error('Data fetch failed');
+                    const data = await response.json();
 
                     // Update Rank & Record
                     if (data.standings) {
@@ -527,9 +484,23 @@
                     if (data.schedule && data.schedule.length > 0) {
                         const nextMatchContainer = document.getElementById('next-match-container');
                         if (nextMatchContainer) {
-                            // Assuming the API returns upcoming games or the full season in chronological order.
-                            // We will pick the first match. 
-                            const match = data.schedule[0];
+                            // Find the next upcoming match based on the current date
+                            const now = new Date();
+                            // Reset time to start of day for accurate comparison (we want to show today's game if it exists)
+                            now.setHours(0, 0, 0, 0); 
+                            
+                            let match = data.schedule.find(m => {
+                                // m.date is like "Sat, Mar 14". We need a Year for a true Date object parsing.
+                                // We can append the current year or assume the API data dates are for the current season year.
+                                const matchDateStr = m.date + ", " + now.getFullYear();
+                                const d = new Date(matchDateStr);
+                                return d >= now;
+                            });
+
+                            // Fallback to the first match if no upcoming matches are found (e.g. end of season)
+                            if (!match) {
+                                match = data.schedule[0];
+                            }
 
                             const isHome = match.home;
                             const location = match.location || (isHome ? 'Sports Illustrated Arena' : 'Away');

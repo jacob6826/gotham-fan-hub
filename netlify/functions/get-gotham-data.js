@@ -71,21 +71,55 @@ const processScheduleData = (apiData) => {
         // Filter provided by API URL now, but keeping safe check just in case
         const gothamMatches = apiData.matches;
 
-        return gothamMatches.map(m => {
-            const dateObj = new Date(m.matchDate || m.date); // Handle potential field variations
+        // Filter matches: remove pre-season/exhibition games (like the one in January)
+        const nswlMatches = gothamMatches.filter(m => {
+            const dateObj = new Date(m.matchDateUtc || m.matchDate || m.date);
+            // The NWSL season starts in March, filter out January/February friendlies
+            if (dateObj.getMonth() < 2) return false;
+            
+            // Further filter by competition name or ID if available
+            const compName = m.competition ? (m.competition.name || m.competition.competitionName) : '';
+            if (compName && !compName.includes('NWSL')) return false;
+
+            return true;
+        });
+
+        return nswlMatches.map(m => {
+            const dateObj = new Date(m.matchDateUtc || m.matchDate || m.date); // Handle potential field variations
             const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
             // Robust checks for team objects
-            const homeId = m.homeTeam ? m.homeTeam.teamId : '';
+            const homeTeam = m.home || m.homeTeam || {};
+            const awayTeam = m.away || m.awayTeam || {};
+            const homeId = homeTeam.teamId || '';
             const isHome = homeId === GOTHAM_ID;
 
             let opponent = "TBD";
-            if (isHome && m.awayTeam) opponent = m.awayTeam.teamName || m.awayTeam.name || "TBD";
-            else if (!isHome && m.homeTeam) opponent = m.homeTeam.teamName || m.homeTeam.name || "TBD";
+            if (isHome) opponent = awayTeam.officialName || awayTeam.teamName || awayTeam.name || "TBD";
+            else opponent = homeTeam.officialName || homeTeam.teamName || homeTeam.name || "TBD";
 
-            const location = m.venue ? m.venue.name : (m.venueName || (isHome ? 'Red Bull Arena' : 'Away'));
+            const location = m.stadiumName || (m.venue ? m.venue.name : null) || m.venueName || (isHome ? 'Red Bull Arena' : 'Away');
+            
+            // Try to resolve competition name, fallback to 'NWSL' if the 2026 API omits it
             const competition = m.competition ? (m.competition.name || m.competition.competitionName) : 'NWSL';
+
+            // Check if game is played by looking for scores
+            let scoreStr = null;
+            if (m.providerHomeScore !== undefined && m.providerHomeScore !== null &&
+                m.providerAwayScore !== undefined && m.providerAwayScore !== null) {
+                if (isHome) {
+                    scoreStr = `${m.providerHomeScore} - ${m.providerAwayScore}`;
+                    if (m.providerHomeScore > m.providerAwayScore) scoreStr = `W ${scoreStr}`;
+                    else if (m.providerHomeScore < m.providerAwayScore) scoreStr = `L ${scoreStr}`;
+                    else scoreStr = `D ${scoreStr}`;
+                } else {
+                    scoreStr = `${m.providerAwayScore} - ${m.providerHomeScore}`;
+                    if (m.providerAwayScore > m.providerHomeScore) scoreStr = `W ${scoreStr}`;
+                    else if (m.providerAwayScore < m.providerHomeScore) scoreStr = `L ${scoreStr}`;
+                    else scoreStr = `D ${scoreStr}`;
+                }
+            }
 
             return {
                 date: dateStr,
@@ -93,7 +127,8 @@ const processScheduleData = (apiData) => {
                 competition: competition,
                 opponent: opponent,
                 location: location,
-                home: isHome
+                home: isHome,
+                score: scoreStr
             };
         });
     } catch (e) {
@@ -157,11 +192,11 @@ exports.handler = async function (event, context) {
     // Roster: Use 2026 as requested
     const NWSL_ROSTER_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39/roster?locale=en-US&seasonId=${SEASON_2026}`;
 
-    // Schedule, Stats, Standings: Use 2025 (since 2026 is empty)
+    // Schedule, Stats, Standings: Using 2026 season data now that the season has started
     // UPDATE: User provided correct 2026 Schedule URL with team filter
     const NWSL_SCHEDULE_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2026}/matches?locale=en-US&relevantTeamIds=nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39`;
-    const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
-    const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2025}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
+    const NWSL_STATS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2026}/stats/teams/nwsl::Football_Team::c83f2ca05aa84c738b5373f0d2a31b39?locale=en-US&category=general`;
+    const NWSL_STANDINGS_API_URL = `https://api-sdp.nwslsoccer.com/v1/nwsl/football/seasons/${SEASON_2026}/standings/overall?locale=en-US&orderBy=rank&direction=asc`;
 
     const fallbackData = {
         roster: [{ name: "Ann-Katrin Berger", pos: "GK", num: 30, bio: "Goalkeeper from Germany", headshot: null, pageUrl: null }],
