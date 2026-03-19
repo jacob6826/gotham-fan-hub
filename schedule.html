@@ -186,37 +186,60 @@
                         `;
                     }
 
-                    // Conditional Styling for Home vs Away
+                    // Create a large, transparent watermark using the first 3 letters of the opponent
+                    let abbrMatch = opponent.match(/\b([A-Z])/g);
+                    let oppAbbr = abbrMatch && abbrMatch.length >= 2 ? (abbrMatch[0] + abbrMatch[1]).toUpperCase() : opponent.substring(0, 3).toUpperCase();
+                    if (opponent === 'Gotham FC') oppAbbr = 'NJNY';
+
+                    // Pick an accent color index based on opponent name length to give a subtle unique hue mix to away games
+                    const accentHues = ['from-cyan-900/40', 'from-purple-900/40', 'from-blue-900/40', 'from-teal-900/40', 'from-indigo-900/40'];
+                    const hueClass = accentHues[opponent.length % accentHues.length];
+
                     if (isHome) {
-                        // Home Game: Cyan accents, slightly lighter bg
-                        card.className = 'relative overflow-hidden bg-gotham-dark border border-gotham-cyan/30 p-6 rounded-lg group hover:border-gotham-cyan transition-all duration-300 hover:-translate-y-1 shadow-[0_0_15px_rgba(34,211,238,0.1)] flex flex-col justify-between';
+                        // Home Game: Cyan accents, slightly lighter bg with watermark
+                        card.className = 'relative overflow-hidden bg-gotham-dark border border-gotham-cyan/30 p-6 rounded-xl group hover:border-gotham-cyan transition-all duration-300 hover:-translate-y-2 shadow-[0_0_15px_rgba(34,211,238,0.1)] hover:shadow-[0_10px_30px_rgba(34,211,238,0.2)] flex flex-col justify-between';
                         card.innerHTML = `
-                             <div class="absolute top-0 right-0 p-16 bg-gotham-cyan/5 rounded-full blur-3xl -mr-8 -mt-8 pointer-events-none"></div>
+                             <!-- Top right soft glow -->
+                             <div class="absolute top-0 right-0 p-24 bg-gotham-cyan/10 rounded-full blur-3xl top-[-2rem] right-[-2rem] pointer-events-none group-hover:bg-gotham-cyan/20 transition-all duration-500"></div>
+                             
+                             <!-- Giant Transparent Opponent Watermark -->
+                             <div class="absolute -bottom-6 -right-2 text-[8rem] font-black text-white/[0.03] uppercase select-none pointer-events-none tracking-tighter group-hover:text-white/[0.05] group-hover:scale-105 transition-all duration-500 leading-none">
+                                ${oppAbbr}
+                             </div>
+
                              <div class="relative z-10 flex-1 flex flex-col">
                                 <div>
                                     <div class="flex justify-between items-start mb-4">
-                                        <span class="px-2 py-1 bg-gotham-cyan text-black font-bold text-xs uppercase tracking-widest rounded">${competition}</span>
-                                        <span class="text-gotham-cyan font-bold text-xs font-mono uppercase tracking-widest text-right">HOME MATCH</span>
+                                        <span class="px-3 py-1 bg-gotham-cyan text-black font-bold text-xs uppercase tracking-widest rounded-full shadow-lg shadow-cyan-500/20">${competition}</span>
+                                        <span class="text-gotham-cyan font-bold text-xs font-mono uppercase tracking-widest text-right flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+                                            HOME MATCH
+                                        </span>
                                     </div>
                                     <div class="mb-6">
-                                        <div class="text-gray-400 text-xs uppercase tracking-wider mb-1">Vs</div>
-                                        <h3 class="text-2xl font-black text-white leading-tight uppercase">${opponent}</h3>
+                                        <div class="text-gray-400 text-xs uppercase tracking-wider mb-1 font-bold">Vs</div>
+                                        <h3 class="text-3xl font-black text-white leading-tight uppercase tracking-tighter">${opponent}</h3>
+                                        <div class="text-gotham-cyan/60 text-xs mt-1 uppercase flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                            ${location}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="mt-auto">
-                                    <div class="flex items-end justify-between border-t border-gray-800 pt-4">
+                                    <div class="flex items-end justify-between border-t border-gray-800/80 pt-5">
                                         <div class="flex flex-col">
                                             <div class="flex items-center text-white font-bold mb-1">
-                                                <span class="text-lg mr-2">${dateStr.split(',')[0]}</span> <!-- Day -->
-                                                <span class="text-3xl font-black text-white">${dateStr.split(' ')[2]}</span> <!-- Date Number -->
+                                                <span class="text-xl mr-2 text-gotham-cyan">${dateStr.split(',')[0]}</span>
+                                                <span class="text-4xl font-black text-white">${dateStr.split(' ')[2]}</span>
                                             </div>
-                                            <div class="flex items-center text-gray-400 text-sm font-mono">
+                                            <div class="flex items-center text-gray-400 text-sm font-bold tracking-wider">
+                                                <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                 ${timeStr}
                                             </div>
                                         </div>
                                         <div>
                                             ${!match.score ? `
-                                            <a href="https://www.gothamfc.com/tickets" target="_blank" class="block px-6 py-2 bg-gotham-cyan text-black text-xs font-bold uppercase tracking-widest hover:bg-white transition-colors rounded-sm shadow-lg hover:shadow-cyan-500/20">
+                                            <a href="https://www.gothamfc.com/tickets" target="_blank" class="block px-6 py-2.5 bg-gotham-cyan text-black text-xs font-bold uppercase tracking-widest hover:bg-white transition-colors rounded shadow-lg shadow-cyan-500/20 active:scale-95">
                                                 Tickets
                                             </a>
                                             ` : ''}
@@ -227,28 +250,41 @@
                             </div>
                         `;
                     } else {
-                        // Away Game: Darker, Gray accents
-                        card.className = 'relative overflow-hidden bg-black/60 border border-gray-800 p-6 rounded-lg group hover:border-gray-600 transition-all duration-300 hover:-translate-y-1 opacity-80 hover:opacity-100 flex flex-col justify-between';
+                        // Away Game: Gradient background, sleek border
+                        card.className = `relative overflow-hidden bg-gradient-to-br ${hueClass} to-black/80 border border-gray-800 p-6 rounded-xl group hover:border-gray-500 transition-all duration-300 hover:-translate-y-2 opacity-90 hover:opacity-100 flex flex-col justify-between`;
                         card.innerHTML = `
-                            <div class="flex-1 flex flex-col">
+                            <!-- Giant Transparent Opponent Watermark -->
+                             <div class="absolute -bottom-6 -right-2 text-[8rem] font-black text-white/[0.02] uppercase select-none pointer-events-none tracking-tighter group-hover:text-white/[0.04] group-hover:scale-105 transition-all duration-500 leading-none">
+                                ${oppAbbr}
+                             </div>
+
+                             <div class="relative z-10 flex-1 flex flex-col">
                                 <div>
                                     <div class="flex justify-between items-start mb-4">
-                                        <span class="px-2 py-1 bg-gray-900 text-gray-400 font-bold text-xs uppercase tracking-widest rounded border border-gray-800">${competition}</span>
-                                        <span class="text-gray-500 font-bold text-xs font-mono uppercase tracking-widest text-right">AWAY</span>
+                                        <span class="px-3 py-1 bg-gray-900 text-gray-400 font-bold text-xs uppercase tracking-widest rounded-full border border-gray-800">${competition}</span>
+                                        <span class="text-gray-500 font-bold text-xs font-mono uppercase tracking-widest text-right flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            AWAY MATCH
+                                        </span>
                                     </div>
                                     <div class="mb-6">
-                                        <div class="text-gray-600 text-xs uppercase tracking-wider mb-1">At</div>
-                                        <h3 class="text-2xl font-black text-gray-300 leading-tight uppercase group-hover:text-white transition-colors">${opponent}</h3>
+                                        <div class="text-gray-500 text-xs uppercase tracking-wider mb-1 font-bold">At</div>
+                                        <h3 class="text-3xl font-black text-gray-300 leading-tight uppercase tracking-tighter group-hover:text-white transition-colors">${opponent}</h3>
+                                        <div class="text-gray-500 text-xs mt-1 uppercase flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                            ${location}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="mt-auto">
-                                    <div class="flex items-end justify-between border-t border-gray-800 pt-4">
+                                    <div class="flex items-end justify-between border-t border-gray-800/80 pt-5">
                                         <div class="flex flex-col">
                                             <div class="flex items-center text-gray-400 font-bold mb-1 group-hover:text-white transition-colors">
-                                                <span class="text-lg mr-2">${dateStr.split(',')[0]}</span>
-                                                <span class="text-3xl font-black">${dateStr.split(' ')[2]}</span>
+                                                <span class="text-xl mr-2">${dateStr.split(',')[0]}</span>
+                                                <span class="text-4xl font-black">${dateStr.split(' ')[2]}</span>
                                             </div>
-                                            <div class="flex items-center text-gray-600 text-sm font-mono group-hover:text-gray-400 transition-colors">
+                                            <div class="flex items-center text-gray-500 text-sm font-bold tracking-wider group-hover:text-gray-400 transition-colors">
+                                                <svg class="w-4 h-4 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                 ${timeStr}
                                             </div>
                                         </div>
