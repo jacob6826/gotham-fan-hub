@@ -128,13 +128,7 @@
         </div>
     </section>
 
-    <!-- Ticker / Next Match Strip -->
-    <div class="bg-gotham-dark border-y border-gray-800 py-3 overflow-hidden whitespace-nowrap relative flex">
-        <div id="ticker-content"
-            class="flex items-center gap-12 animate-scroll font-heading font-bold text-gray-400 text-sm tracking-widest uppercase shrink-0 min-w-full">
-            <span>Loading Gotham FC Updates...</span>
-        </div>
-    </div>
+
 
 
     <!-- Section: Next Match -->
@@ -549,31 +543,7 @@
                         }
                     }
 
-                    // Populate Ticker
-                    const ticker = document.getElementById('ticker-content');
-                    if (ticker && data.schedule) {
-                        const now = new Date();
-                        now.setHours(0, 0, 0, 0); 
-                        const pastMatches = data.schedule.filter(m => (new Date(m.date + ", " + now.getFullYear()) < now) || m.score);
-                        const lastMatch = pastMatches.length > 0 ? pastMatches[pastMatches.length - 1] : null;
-                        
-                        let lastMatchStr = lastMatch && lastMatch.score ? `Last Match: ${lastMatch.opponent} (${lastMatch.score})` : '2026 Season Underway';
-                        
-                        let nextMatch = data.schedule.find(m => new Date(m.date + ", " + now.getFullYear()) >= now) || data.schedule[0];
-                        let nextMatchStr = nextMatch ? `Next Match: ${nextMatch.date} vs ${nextMatch.opponent}` : 'Next Match: TBD';
-                        
-                        let rankStr = data.standings && data.standings.rank ? `Current Rank: ${data.standings.rank}` : 'Reigning Champions';
-                        let recordStr = data.standings && data.standings.record ? `Record: ${data.standings.record}` : 'Standings TBD';
 
-                        // Repeat the sequence multiple times so the continuous CSS scroll doesn't run out of elements early
-                        const items = [
-                            nextMatchStr, '•', lastMatchStr, '•', rankStr, '•', recordStr, '•', 'Buy Tickets Now', '•',
-                            nextMatchStr, '•', lastMatchStr, '•', rankStr, '•', recordStr, '•', 'Buy Tickets Now', '•',
-                            nextMatchStr, '•', lastMatchStr, '•', rankStr, '•', recordStr, '•', 'Buy Tickets Now', '•'
-                        ];
-
-                        ticker.innerHTML = items.map(item => item === '•' ? `<span class="text-gotham-cyan mx-12">•</span>` : `<span>${item}</span>`).join('');
-                    }
 
                 } catch (e) {
                     console.error(e);
