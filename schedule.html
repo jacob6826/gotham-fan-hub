@@ -141,6 +141,7 @@
                 return dateStr;
             }
 
+            try {
                 const response = await fetch('./.netlify/functions/get-gotham-data');
                 if (!response.ok) throw new Error('Failed to fetch schedule data');
                 const data = await response.json();

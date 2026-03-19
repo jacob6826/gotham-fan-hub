@@ -180,18 +180,24 @@
                 })
             },
             attacking: {
-                chart1: (stats) => ({
-                    type: 'pie',
-                    data: {
-                        labels: ['On Target', 'Off Target', 'Blocked'],
-                        datasets: [{
-                            data: [getStat(stats, 'Shots on Target'), getStat(stats, 'Shots off Target'), getStat(stats, 'Blocked Shots')],
-                            backgroundColor: ['#22d3ee', '#333333', '#ffffff'],
-                            borderWidth: 0
-                        }]
-                    },
-                    label: 'Shot Accuracy'
-                }),
+                chart1: (stats) => {
+                    const onTarget = getStat(stats, 'Shots On Target ( inc goals )');
+                    const offTarget = getStat(stats, 'Shots Off Target (inc woodwork)');
+                    const totalShots = getStat(stats, 'Total Shots');
+                    const blocked = Math.max(0, totalShots - onTarget - offTarget);
+                    return {
+                        type: 'pie',
+                        data: {
+                            labels: ['On Target', 'Off Target', 'Blocked'],
+                            datasets: [{
+                                data: [onTarget, offTarget, blocked],
+                                backgroundColor: ['#22d3ee', '#333333', '#ffffff'],
+                                borderWidth: 0
+                            }]
+                        },
+                        label: 'Shot Accuracy'
+                    };
+                },
                 chart2: (stats) => ({
                     type: 'bar',
                     data: {
@@ -424,7 +430,7 @@
                             'Headed Goals': { value: 2 },
                             'home-wins': { value: 7 }, 'home-draws': { value: 2 }, 'home-losses': { value: 1 },
                             'away-wins': { value: 5 }, 'away-draws': { value: 3 }, 'away-losses': { value: 3 },
-                            'Shots on Target': { value: 110 }, 'Shots off Target': { value: 90 }, 'Blocked Shots': { value: 45 },
+                            'Shots On Target ( inc goals )': { value: 110 }, 'Shots Off Target (inc woodwork)': { value: 90 },
                             'Tackles Lost': { value: 65 }, 'Blocks': { value: 89 }
                         }
                     };
