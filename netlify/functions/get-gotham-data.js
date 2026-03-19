@@ -86,8 +86,8 @@ const processScheduleData = (apiData) => {
 
         return nswlMatches.map(m => {
             const dateObj = new Date(m.matchDateUtc || m.matchDate || m.date); // Handle potential field variations
-            const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-            const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/New_York' });
+            const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
 
             // Robust checks for team objects
             const homeTeam = m.home || m.homeTeam || {};
